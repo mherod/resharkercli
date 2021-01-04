@@ -8,6 +8,9 @@ fun main(args: Array<String>) = nativeMain {
         jiraClient = createJiraClient() ?: error("Couldn't init Jira client"),
         gitClient = GitSystemClient()
     )
+    if ("version" in args) {
+        resharker.outputVersion()
+    }
     if ("release" in args) {
         if ("notes" in args) {
             resharker.outputReleaseNotes()

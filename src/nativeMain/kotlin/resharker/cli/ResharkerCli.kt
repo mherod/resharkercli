@@ -5,8 +5,8 @@ import resharker.jiracli.JiraClient
 import resharker.jiracli.JiraIssue
 
 class ResharkerCli(
-    val gitClient: GitClient,
-    val jiraClient: JiraClient,
+    private val gitClient: GitClient,
+    private val jiraClient: JiraClient,
 ) {
 
     suspend fun outputReleaseNotes() {
@@ -31,6 +31,10 @@ class ResharkerCli(
             .distinct()
             .sorted()
             .forEach(::println)
+    }
+
+    fun outputVersion() {
+        println("Git version: ${gitClient.getToolVersion()}")
     }
 
     fun close() {
