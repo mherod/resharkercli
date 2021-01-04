@@ -142,13 +142,19 @@ data class JiraIssue(
         @Serializable
         data class Comments(
             @SerialName("comments")
-            val comments: List<String> = emptyList(),
+            val comments: List<Comment> = emptyList(),
             @SerialName("maxResults")
             val maxResults: Int = 0,
             @SerialName("startAt")
             val startAt: Int = 0,
             @SerialName("total")
             val total: Int = 0,
+        )
+
+        @Serializable
+        data class Comment(
+            @SerialName("self")
+            val self: String
         )
 
         @Serializable
@@ -186,7 +192,7 @@ data class JiraIssue(
             @SerialName("id")
             val id: String,
             @SerialName("inwardIssue")
-            val inwardIssue: InwardIssue,
+            val inwardIssue: InwardIssue? = null,
             @SerialName("self")
             val self: String,
             @SerialName("type")
@@ -206,7 +212,7 @@ data class JiraIssue(
                 @Serializable
                 data class Fields(
                     @SerialName("issuetype")
-                    val issuetype: Issuetype,
+                    val issueType: IssueType,
                     @SerialName("priority")
                     val priority: Priority,
                     @SerialName("status")
@@ -215,7 +221,7 @@ data class JiraIssue(
                     val summary: String,
                 ) {
                     @Serializable
-                    data class Issuetype(
+                    data class IssueType(
                         @SerialName("avatarId")
                         val avatarId: Int? = null,
                         @SerialName("description")
@@ -281,11 +287,11 @@ data class JiraIssue(
                 @SerialName("id")
                 val id: String,
                 @SerialName("inward")
-                val inward: String,
+                val inward: String? = null,
                 @SerialName("name")
                 val name: String,
                 @SerialName("outward")
-                val outward: String,
+                val outward: String? = null,
                 @SerialName("self")
                 val self: String,
             )
@@ -294,12 +300,12 @@ data class JiraIssue(
         @Serializable
         data class IssueRestriction(
             @SerialName("issuerestrictions")
-            val issuerestrictions: Issuerestrictions,
+            val issueRestrictions: IssueRestrictions,
             @SerialName("shouldDisplay")
             val shouldDisplay: Boolean,
         ) {
             @Serializable
-            class Issuerestrictions
+            class IssueRestrictions
         }
 
         @Serializable
@@ -485,7 +491,13 @@ data class JiraIssue(
             @SerialName("total")
             val total: Int = 0,
             @SerialName("worklogs")
-            val worklogs: List<String> = emptyList(),
+            val worklogs: List<WorklogItem> = emptyList(),
+        )
+
+        @Serializable
+        data class WorklogItem(
+            @SerialName("self")
+            val self: String
         )
     }
 }
