@@ -1,0 +1,30 @@
+version: 2
+jobs:
+  build:
+    macos:
+      xcode: 12.3.0
+
+    working_directory: ~/repo
+
+    environment:
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - v2-dependencies-{{ checksum "build.gradle.kts" }}-{{ checksum "settings.gradle.kts" }}
+            - v2-dependencies-
+
+      - run: ./gradlew dependencies
+
+      - save_cache:
+          paths:
+            - ~/.konan
+            - ~/.gradle
+          key: v2-dependencies-{{ checksum "build.gradle.kts" }}-{{ checksum "settings.gradle.kts" }}
+
+      - run: ./gradlew build allTests installBinary
+      - run: resharkercli projects dump
