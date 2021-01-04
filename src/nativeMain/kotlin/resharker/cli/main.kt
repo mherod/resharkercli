@@ -1,6 +1,6 @@
 package resharker.cli
 
-import resharker.GitSystemClient
+import resharker.git.GitSystemClient
 import resharker.jiracli.createJiraClient
 
 fun main(args: Array<String>) = nativeMain {

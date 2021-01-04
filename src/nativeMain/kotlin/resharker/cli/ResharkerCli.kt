@@ -1,17 +1,21 @@
 package resharker.cli
 
-import resharker.GitSystemClient
+import resharker.git.GitClient
 import resharker.jiracli.JiraClient
 import resharker.jiracli.JiraIssue
 
 class ResharkerCli(
-    val gitClient: GitSystemClient,
+    val gitClient: GitClient,
     val jiraClient: JiraClient,
 ) {
 
     suspend fun outputReleaseNotes() {
 
+        val branch = gitClient.getCurrentBranch()
         val lastTag = gitClient.getLastTag()
+
+        println("Changes since $lastTag on branch $branch")
+
         val log = gitClient.getLogDiff(since = lastTag)
 
         val tickets = issueKeyRegex.toRegex()

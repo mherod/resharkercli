@@ -1,17 +1,17 @@
-package resharker
+package resharker.git
 
 import resharker.cli.exec
 
-class GitSystemClient {
-    fun getCurrentBranch(): String {
+class GitSystemClient : GitClient {
+    override fun getCurrentBranch(): String {
         return exec("git rev-parse --abbrev-ref HEAD").trim()
     }
 
-    fun getLastTag(): String {
+    override fun getLastTag(): String {
         return exec("git describe origin/master --tags --abbrev=0").trim()
     }
 
-    fun getLogDiff(since: String): String {
+    override fun getLogDiff(since: String): String {
         return exec("git log $since..HEAD --pretty=oneline --abbrev-commit")
     }
 }
