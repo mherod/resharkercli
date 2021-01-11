@@ -15,7 +15,7 @@ class GitSystemClient : GitClient {
     }
 
     override fun getLastTag(): String {
-        return exec("git describe origin/master --tags --abbrev=0").trim()
+        return exec("git describe origin/main --tags --abbrev=0").trim()
             .also { check(it.isNotBlank()) }
             .also { check(!it.startsWith("fatal:")) }
     }

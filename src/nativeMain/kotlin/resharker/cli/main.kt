@@ -9,10 +9,12 @@ fun main(args: Array<String>) = nativeMain {
         gitClient = GitSystemClient()
     )
     when {
+        args.isEmpty() -> resharker.greeting()
         "version" in args -> resharker.outputVersion()
         "release" in args -> when {
             "notes" in args -> resharker.outputReleaseNotes()
         }
+        else -> resharker.help()
     }
     resharker.close()
 }
