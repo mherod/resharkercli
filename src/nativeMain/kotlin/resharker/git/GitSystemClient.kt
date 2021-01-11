@@ -14,8 +14,14 @@ class GitSystemClient : GitClient {
             .also { check(!it.startsWith("fatal:")) }
     }
 
-    override fun getLastTag(): String {
-        return exec("git describe origin/main --tags --abbrev=0").trim()
+    override fun listBranches(remote: Boolean): List<String> {
+        return exec("git branch${if (remote) " -r" else ""}")
+            .split("[\\n|\\s]".toRegex())
+            .map { it.trim() }
+    }
+
+    override fun getLastTag(from: String, abbrev: Int): String {
+        return exec("git describe $from --tags --abbrev=$abbrev").trim()
             .also { check(it.isNotBlank()) }
             .also { check(!it.startsWith("fatal:")) }
     }

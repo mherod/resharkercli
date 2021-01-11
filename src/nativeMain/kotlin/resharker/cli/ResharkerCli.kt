@@ -11,7 +11,7 @@ class ResharkerCli(
 
     fun greeting() {
         val branch = gitClient.getCurrentBranch()
-        val issueKey = branch.extract(issueKeyRegex)
+        val issueKey = branch.extract(issueKeyRegex)?.correctIssueKey()
         val enclose = branch.extract(enclosedKeyRegex)
         val guess = branch.extract(otherwiseRegex)
         val branchKey = (issueKey ?: enclose ?: guess ?: branch).trim { it.isLetterOrDigit().not() }
@@ -25,25 +25,14 @@ class ResharkerCli(
     suspend fun outputReleaseNotes() {
 
         val branch = gitClient.getCurrentBranch()
-        val lastTag = gitClient.getLastTag()
-
-        val projectKeys = jiraClient.listProjects().map { it.key.toUpperCase() }
+        val lastTag = gitClient.getLastTag(from = detectMainBranch())
 
         println("Changes since $lastTag on branch $branch")
 
-        val log = gitClient.getLogDiff(since = lastTag)
-
-        val tickets = issueKeyRegex.toRegex()
-            .findAll(log)
-            .flatMap { it.groupValues }
-            .map { key ->
-                autoCorrectProjectKey(
-                    possibleKey = key,
-                    projectKeys = projectKeys
-                )
-            }
-            .map { key -> key.trim { !it.isLetterOrDigit() } }
-            .toSet()
+        val tickets = extractIssueKeys(
+            dirtyInput = gitClient.getLogDiff(since = lastTag),
+            projectKeys = jiraClient.getProjectKeys()
+        )
 
         @Suppress("ConvertCallChainIntoSequence")
         tickets.map { jiraClient.getIssue(it) }
@@ -55,6 +44,13 @@ class ResharkerCli(
             .forEach(::println)
     }
 
+    private fun detectMainBranch(): String {
+        return gitClient.listBranches(remote = true)
+            .filter(hasMainBranchName())
+            .minByOrNull(String::length)
+            ?: error("Couldn't determine main branch")
+    }
+
     fun outputVersion() {
         println("Git version: ${gitClient.getToolVersion()}")
     }
@@ -63,14 +59,37 @@ class ResharkerCli(
         jiraClient.close()
     }
 
-    private fun autoCorrectProjectKey(
-        possibleKey: String,
+    private fun extractIssueKeys(
+        dirtyInput: String,
         projectKeys: List<String>,
-    ): String = when (val project = possibleKey.substringBefore('-').toUpperCase()) {
-        in projectKeys -> possibleKey
-        else -> possibleKey.replace(
-            oldValue = project,
-            newValue = projectKeys.maxByOrNull { project.commonPrefixWith(it) } ?: project
-        )
+    ) = issueKeyRegex.toRegex()
+        .findAll(dirtyInput)
+        .flatMap { it.groupValues }
+        .map { it.correctIssueKey(projectKeys = projectKeys) }
+        .map { key -> key.trim { !it.isLetterOrDigit() } }
+        .toSet()
+
+    private tailrec fun String.correctIssueKey(
+        projectKeys: List<String> = emptyList(),
+    ): String {
+        val project = substringBefore('-').toUpperCase()
+        val issueNum = substringAfter('-').trim { !it.isDigit() }
+        return when {
+            project in projectKeys -> "$project-$issueNum"
+            projectKeys.isEmpty() -> "$project-$issueNum"
+            else -> replace(
+                oldValue = project,
+                newValue = projectKeys.maxByOrNull { project.commonPrefixWith(it) } ?: project,
+                ignoreCase = true
+            ).correctIssueKey(projectKeys)
+        }
     }
+}
+
+fun hasMainBranchName(): (String) -> Boolean = { branchInput ->
+    branchInput.substringAfter('/') in arrayOf("main", "master")
+}
+
+suspend fun JiraClient.getProjectKeys(): List<String> {
+    return listProjects().map { it.key.toUpperCase() }.distinct()
 }
