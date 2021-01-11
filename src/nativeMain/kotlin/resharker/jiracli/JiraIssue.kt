@@ -29,7 +29,7 @@ data class JiraIssue(
         @SerialName("assignee")
         val assignee: Assignee? = null,
         @SerialName("attachment")
-        val attachment: List<String> = emptyList(),
+        val attachment: List<Attachments> = emptyList(),
         @SerialName("comment")
         val comment: Comments = Comments(),
         @SerialName("components")
@@ -153,6 +153,12 @@ data class JiraIssue(
 
         @Serializable
         data class Comment(
+            @SerialName("self")
+            val self: String
+        )
+
+        @Serializable
+        data class Attachments(
             @SerialName("self")
             val self: String
         )
