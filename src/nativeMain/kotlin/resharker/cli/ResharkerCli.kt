@@ -26,7 +26,7 @@ class ResharkerCli(
     suspend fun outputProjectList() {
         jiraClient.listProjects().forEach {
             val key = it.key
-            val name = it.name
+            val name = it.name.trim()
             println(when (key) {
                 name -> key
                 name.toInitialism() -> "$key ($name)"
