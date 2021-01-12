@@ -11,20 +11,12 @@ class ResharkerCli(
 ) {
 
     fun greeting() {
-        println("Branch key: ${currentBranchKey()}")
+        println("Branch key: ${parseKey(input = gitClient.getCurrentBranch())}")
     }
 
-    fun outputCurrentBranchKey() {
-        println(currentBranchKey())
-    }
+    fun outputParsedKey(input: String) = println(parseKey(input))
 
-    private fun currentBranchKey(): String {
-        val branch = gitClient.getCurrentBranch()
-        val issueKey = branch.extract(issueKeyRegex)?.correctIssueKey()
-        val enclose = branch.extract(enclosedKeyRegex)
-        val guess = branch.extract(otherwiseRegex)
-        return (issueKey ?: enclose ?: guess ?: branch).trim { it.isLetterOrDigit().not() }
-    }
+    fun outputCurrentBranchKey() = println(parseKey(input = gitClient.getCurrentBranch()))
 
     fun help() {
         TODO("Not yet implemented")
@@ -82,6 +74,14 @@ class ResharkerCli(
 
     fun close() {
         jiraClient.close()
+    }
+
+    private fun parseKey(input: String): String {
+        require(input.isNotBlank())
+        val issueKey = input.extract(issueKeyRegex)?.correctIssueKey()
+        val enclose = input.extract(enclosedKeyRegex)
+        val guess = input.extract(otherwiseRegex)
+        return (issueKey ?: enclose ?: guess ?: input).trim { it.isLetterOrDigit().not() }
     }
 
     private fun extractIssueKeys(
