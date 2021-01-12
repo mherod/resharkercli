@@ -14,10 +14,19 @@ class GitSystemClient : GitClient {
             .also { check(!it.startsWith("fatal:")) }
     }
 
-    override fun listBranches(remote: Boolean): List<String> {
+    override fun listBranches(remote: Boolean): Set<String> {
         return exec("git branch${if (remote) " -r" else ""}")
             .split("[\\n|\\s]".toRegex())
             .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .toSet()
+    }
+
+    override fun listRemotes(): Set<String> {
+        return exec("git remote").split("[\\n|\\s]".toRegex())
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .toSet()
     }
 
     override fun getLastTag(from: String, abbrev: Int): String {
