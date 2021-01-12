@@ -24,8 +24,14 @@ class ResharkerCli(
     }
 
     suspend fun outputProjectList() {
-        jiraClient.listProjects().forEach { item ->
-            println("${item.key} ${item.name}")
+        jiraClient.listProjects().forEach {
+            val key = it.key
+            val name = it.name
+            println(when (key) {
+                name -> key
+                name.toInitialism() -> "$key ($name)"
+                else -> "$key $name"
+            })
         }
     }
 
