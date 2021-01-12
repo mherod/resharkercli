@@ -107,7 +107,10 @@ class ResharkerCli(
 }
 
 inline fun hasMainBranchName(): (String) -> Boolean = { branchInput ->
-    branchInput.substringAfter('/') in arrayOf("main", "master")
+    branchInput.substringAfter('/') in arrayOf(
+        "main",
+        "master"
+    )
 }
 
 suspend inline fun JiraClient.getProjectKeys(): Set<String> {
