@@ -3,7 +3,8 @@ package resharker.jiracli
 import io.ktor.client.*
 import io.ktor.client.features.json.*
 import io.ktor.client.request.*
-import resharker.cli.*
+import resharker.cli.issueKeyRegex
+import resharker.cli.requireMatch
 
 class JiraClient(
     private val httpClient: HttpClient = HttpClient {

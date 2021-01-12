@@ -1,5 +1,6 @@
 package resharker.cli
 
+import kotlinx.coroutines.flow.*
 import resharker.git.GitClient
 import resharker.jiracli.JiraClient
 import resharker.jiracli.JiraIssue
@@ -29,19 +30,24 @@ class ResharkerCli(
 
         println("Changes since $lastTag on branch $branch")
 
-        val tickets = extractIssueKeys(
+        val issueKeys = extractIssueKeys(
             dirtyInput = gitClient.getLogDiff(since = lastTag),
             projectKeys = jiraClient.getProjectKeys()
         )
 
-        @Suppress("ConvertCallChainIntoSequence")
-        tickets.map { jiraClient.getIssue(it) }
-            .distinctBy(JiraIssue::id)
-            .distinctBy(JiraIssue::key)
-            .map { issue -> "${issue.key} ${issue.fields.summary}" }
-            .distinct()
-            .sorted()
-            .forEach(::println)
+        getJiraIssues(issueKeys = issueKeys)
+            .map { issue ->
+                "\t${issue.key} ${issue.fields.summary} (${issue.fields.status.name})"
+            }.distinctUntilChanged()
+            .collect { println(it) }
+    }
+
+    private suspend fun getJiraIssues(issueKeys: Set<String>): Flow<JiraIssue> {
+        return issueKeys.sorted()
+            .asFlow()
+            .distinctUntilChanged()
+            .map { jiraClient.getIssue(it) }
+            .distinctUntilChanged()
     }
 
     private fun detectMainBranch(): String {
@@ -61,16 +67,18 @@ class ResharkerCli(
 
     private fun extractIssueKeys(
         dirtyInput: String,
-        projectKeys: List<String>,
+        projectKeys: Set<String>,
     ) = issueKeyRegex.toRegex()
         .findAll(dirtyInput)
         .flatMap { it.groupValues }
+        .distinct()
         .map { it.correctIssueKey(projectKeys = projectKeys) }
         .map { key -> key.trim { !it.isLetterOrDigit() } }
+        .distinct()
         .toSet()
 
     private tailrec fun String.correctIssueKey(
-        projectKeys: List<String> = emptyList(),
+        projectKeys: Set<String> = emptySet(),
     ): String {
         val project = substringBefore('-').toUpperCase()
         val issueNum = substringAfter('-').trim { !it.isDigit() }
@@ -86,10 +94,10 @@ class ResharkerCli(
     }
 }
 
-fun hasMainBranchName(): (String) -> Boolean = { branchInput ->
+inline fun hasMainBranchName(): (String) -> Boolean = { branchInput ->
     branchInput.substringAfter('/') in arrayOf("main", "master")
 }
 
-suspend fun JiraClient.getProjectKeys(): List<String> {
-    return listProjects().map { it.key.toUpperCase() }.distinct()
+suspend inline fun JiraClient.getProjectKeys(): Set<String> {
+    return listProjects().map { it.key.toUpperCase() }.toSet()
 }
