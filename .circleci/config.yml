@@ -28,4 +28,5 @@ jobs:
 
       - run: ./gradlew build allTests installBinary
       - run: resharkercli version
+      - run: resharkercli current key
       - run: resharkercli project list

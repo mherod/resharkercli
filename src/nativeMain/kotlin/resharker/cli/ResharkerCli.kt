@@ -11,12 +11,19 @@ class ResharkerCli(
 ) {
 
     fun greeting() {
+        println("Branch key: ${currentBranchKey()}")
+    }
+
+    fun outputCurrentBranchKey() {
+        println(currentBranchKey())
+    }
+
+    private fun currentBranchKey(): String {
         val branch = gitClient.getCurrentBranch()
         val issueKey = branch.extract(issueKeyRegex)?.correctIssueKey()
         val enclose = branch.extract(enclosedKeyRegex)
         val guess = branch.extract(otherwiseRegex)
-        val branchKey = (issueKey ?: enclose ?: guess ?: branch).trim { it.isLetterOrDigit().not() }
-        println("Branch key: $branchKey")
+        return (issueKey ?: enclose ?: guess ?: branch).trim { it.isLetterOrDigit().not() }
     }
 
     fun help() {

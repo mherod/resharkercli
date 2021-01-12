@@ -11,6 +11,9 @@ fun main(args: Array<String>) = nativeMain {
     when {
         args.isEmpty() -> resharker.greeting()
         "version" in args -> resharker.outputVersion()
+        "current" in args -> when {
+            "key" in args -> resharker.outputCurrentBranchKey()
+        }
         "project" in args -> when {
             "list" in args -> resharker.outputProjectList()
         }
