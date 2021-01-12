@@ -23,6 +23,12 @@ class ResharkerCli(
         TODO("Not yet implemented")
     }
 
+    suspend fun outputProjectList() {
+        jiraClient.listProjects().forEach { item ->
+            println("${item.key} ${item.name}")
+        }
+    }
+
     suspend fun outputReleaseNotes() {
 
         val branch = gitClient.getCurrentBranch()
