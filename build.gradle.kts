@@ -35,6 +35,11 @@ kotlin {
     }
 
     nativeTarget.apply {
+        compilations {
+            getByName("main").apply {
+                enableEndorsedLibs = true
+            }
+        }
         binaries {
             executable {
                 entryPoint = "resharker.cli.main"
