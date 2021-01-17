@@ -88,6 +88,12 @@ kotlin {
     }
 }
 
+task<Exec>("cleanEmptyDirs") {
+    inputs.files(fileTree("src"))
+    outputs.files(fileTree("src"))
+    commandLine("find", "$projectDir/src/", "-type", "d", "-empty", "-delete")
+}
+
 task<Copy>("installBinary") {
     dependsOn(tasks.getByName("build"))
     from("$buildDir/bin/native/releaseExecutable/")
