@@ -12,8 +12,6 @@ class ResharkerCli(
     private val jiraClient: IJiraClient,
 ) {
 
-    fun outputParsedKey(input: String) = println(parseKey(input))
-
     fun currentBranchKey(): String = parseKey(input = gitClient.getCurrentBranch())
 
     suspend fun openCurrentBranchIssue() {
@@ -80,7 +78,7 @@ class ResharkerCli(
         jiraClient.close()
     }
 
-    private fun parseKey(input: String): String {
+    fun parseKey(input: String): String {
         require(input.isNotBlank())
         val issueKey = input.extract(issueKeyRegex)?.correctIssueKey()
         val enclose = input.extract(enclosedKeyRegex)
@@ -116,6 +114,8 @@ class ResharkerCli(
         }
     }
 }
+
+fun ResharkerCli.outputParsedKey(input: String) = println(parseKey(input))
 
 fun ResharkerCli.outputCurrentBranchKey() = println(currentBranchKey())
 

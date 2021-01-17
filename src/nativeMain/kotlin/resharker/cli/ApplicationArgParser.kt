@@ -18,7 +18,8 @@ class ApplicationArgParser : ArgParser(programName = "resharkercli") {
             VersionSubcommand(resharker),
             ProjectSubcommand(resharker),
             CurrentSubcommand(resharker),
-            ReleaseSubcommand(resharker)
+            ReleaseSubcommand(resharker),
+            ParseSubcommand(resharker)
         )
     }
 

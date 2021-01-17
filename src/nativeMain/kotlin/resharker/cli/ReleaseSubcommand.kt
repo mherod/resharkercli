@@ -1,5 +1,6 @@
 package resharker.cli
 
+import kotlinx.cli.ArgType
 import kotlinx.cli.ExperimentalCli
 import kotlinx.cli.Subcommand
 import kotlinx.coroutines.runBlocking
@@ -7,7 +8,7 @@ import kotlinx.coroutines.runBlocking
 @ExperimentalCli
 class ReleaseSubcommand(val resharker: ResharkerCli) : Subcommand(
     name = "release",
-    actionDescription = ""
+    actionDescription = "Operate on a new or existing release"
 ) {
     init {
         subcommands(
@@ -15,11 +16,12 @@ class ReleaseSubcommand(val resharker: ResharkerCli) : Subcommand(
         )
     }
 
-    override fun execute() = TODO("Not yet implemented")
+    override fun execute() {
+    }
 
     inner class ReleaseNotesSubcommand : Subcommand(
         name = "notes",
-        actionDescription = ""
+        actionDescription = "Output release notes related to the current branch"
     ) {
         override fun execute() = runBlocking {
             resharker.outputReleaseNotes()
