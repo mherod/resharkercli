@@ -25,7 +25,9 @@ fun createJiraClient(): IJiraClient = object : IJiraClient {
 
     override suspend fun getProject(id: String): JiraProject.JiraProjectItem = delegate.getProject(id)
 
-    override suspend fun getIssue(key: String): JiraIssue = delegate.getIssue(key)
+    override suspend fun listIssues(projectKey: String): JiraRest3IssueSearch = delegate.listIssues(projectKey)
+
+    override suspend fun getIssue(key: String): JiraRest2Issue = delegate.getIssue(key)
 
     override fun close() {
         if (jiraClientLazy.isInitialized()) {

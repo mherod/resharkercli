@@ -3,6 +3,8 @@ package resharker.jiracli
 import io.ktor.client.*
 import io.ktor.client.features.json.*
 import io.ktor.client.request.*
+import io.ktor.http.*
+import resharker.cli.extractHostName
 import resharker.cli.issueKeyRegex
 import resharker.cli.requireMatch
 
@@ -15,6 +17,13 @@ class JiraClient(
     private val rootUrl: String,
     private val credentials: JiraCredentials,
 ) : IJiraClient {
+
+    private fun HttpRequestBuilder.jiraRestUrl(function: URLBuilder.() -> Unit) = url {
+        protocol = URLProtocol.HTTPS
+        host = rootUrl.extractHostName()
+        function(this)
+        configRequest()
+    }
 
     private fun HttpRequestBuilder.configRequest() {
         credentials.apply {
@@ -32,7 +41,15 @@ class JiraClient(
         configRequest()
     }
 
-    override suspend fun getIssue(key: String): JiraIssue {
+    override suspend fun listIssues(projectKey: String): JiraRest3IssueSearch = httpClient.request {
+        jiraRestUrl {
+            path("rest", "api", "3", "search")
+            parameters.append("jql", "project = $projectKey")
+        }
+        configRequest()
+    }
+
+    override suspend fun getIssue(key: String): JiraRest2Issue {
         key requireMatch issueKeyRegex
         return httpClient.request {
             url("$rootUrl/rest/api/2/issue/${key}")

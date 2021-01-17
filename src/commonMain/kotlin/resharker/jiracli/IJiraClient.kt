@@ -5,7 +5,9 @@ interface IJiraClient {
 
     suspend fun getProject(id: String): JiraProject.JiraProjectItem
 
-    suspend fun getIssue(key: String): JiraIssue
+    suspend fun listIssues(projectKey: String): JiraRest3IssueSearch
+
+    suspend fun getIssue(key: String): JiraRest2Issue
 
     fun close()
 }

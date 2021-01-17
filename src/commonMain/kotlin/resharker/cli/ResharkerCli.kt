@@ -4,7 +4,7 @@ import io.ktor.http.*
 import kotlinx.coroutines.flow.*
 import resharker.git.GitClient
 import resharker.jiracli.IJiraClient
-import resharker.jiracli.JiraIssue
+import resharker.jiracli.JiraRest2Issue
 import resharker.jiracli.getProjectKeys
 
 class ResharkerCli(
@@ -55,7 +55,7 @@ class ResharkerCli(
             .collect { println(it) }
     }
 
-    private suspend fun getJiraIssues(issueKeys: Set<String>): Flow<JiraIssue> {
+    private suspend fun getJiraIssues(issueKeys: Set<String>): Flow<JiraRest2Issue> {
         return issueKeys.sorted()
             .asFlow()
             .distinctUntilChanged()

@@ -15,3 +15,7 @@ fun isValidUrl(url: String) = url.matches("https?://\\S+".toRegex())
 
 expect fun Char.isDigit1(): Boolean
 expect fun Char.isLetterOrDigit1(): Boolean
+fun String.extractHostName(): String {
+    require(isValidUrl(this))
+    return substringAfter("://").substringBefore('/')
+}

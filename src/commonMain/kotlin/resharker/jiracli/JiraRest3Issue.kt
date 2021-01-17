@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class JiraIssue(
+data class JiraRest3Issue(
     @SerialName("expand")
     val expand: String,
     @SerialName("fields")
@@ -38,12 +38,8 @@ data class JiraIssue(
         val created: String,
         @SerialName("creator")
         val creator: Creator,
-        @SerialName("description")
-        val description: String = "",
         @SerialName("duedate")
         val duedate: String? = null,
-        @SerialName("environment")
-        val environment: String? = null,
         @SerialName("fixVersions")
         val fixVersions: List<String> = emptyList(),
         @SerialName("issuelinks")
@@ -74,8 +70,6 @@ data class JiraIssue(
         val status: Status,
         @SerialName("statuscategorychangedate")
         val statuscategorychangedate: String,
-        @SerialName("subtasks")
-        val subtasks: List<String> = emptyList(),
         @SerialName("summary")
         val summary: String = "",
         @SerialName("timeestimate")
@@ -94,8 +88,6 @@ data class JiraIssue(
         val votes: Votes,
         @SerialName("watches")
         val watches: Watches,
-        @SerialName("worklog")
-        val worklog: Worklog?,
         @SerialName("workratio")
         val workratio: Int? = null,
     ) {
