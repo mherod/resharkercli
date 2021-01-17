@@ -113,6 +113,19 @@ class ResharkerCli(
             ).correctIssueKey(projectKeys)
         }
     }
+
+    suspend fun outputQueryResult(query: String) {
+        jiraClient.searchIssues(query).let { result ->
+            when {
+                result.issues.isEmpty() -> {
+                    println("No results")
+                }
+                else -> result.issues.forEach { issue ->
+                    println("${issue.key} ${issue.fields.summary}")
+                }
+            }
+        }
+    }
 }
 
 fun ResharkerCli.outputCurrentBranchKey() = println(currentBranchKey())

@@ -35,3 +35,4 @@ jobs:
       - run: resharkercli project list
       - run: resharkercli parse --help
       - run: resharkercli parse key "dirty/string/with a key/RES-1/somewhere"
+      - run: resharkercli query jql project=RES
