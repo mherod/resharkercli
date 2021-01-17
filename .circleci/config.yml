@@ -27,6 +27,11 @@ jobs:
           key: v2-dependencies-{{ checksum "build.gradle.kts" }}-{{ checksum "settings.gradle.kts" }}
 
       - run: ./gradlew build allTests installBinary
+      - run: resharkercli --help
       - run: resharkercli version
+      - run: resharkercli current --help
       - run: resharkercli current key
+      - run: resharkercli project --help
       - run: resharkercli project list
+      - run: resharkercli parse --help
+      - run: resharkercli parse key "dirty/string/with a key/RES-1/somewhere"
