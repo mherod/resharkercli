@@ -9,6 +9,8 @@ interface IJiraClient {
 
     suspend fun getIssue(key: String): JiraRest2Issue
 
+    suspend fun searchIssues(jql: String): JiraRest3IssueSearch
+
     fun close()
 }
 

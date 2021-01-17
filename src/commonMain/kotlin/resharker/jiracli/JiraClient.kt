@@ -57,6 +57,14 @@ class JiraClient(
         }
     }
 
+    override suspend fun searchIssues(jql: String): JiraRest3IssueSearch = httpClient.request {
+        jiraRestUrl {
+            path("rest", "api", "3", "search")
+            parameters.append("jql", jql)
+        }
+        configRequest()
+    }
+
     override fun close() {
         httpClient.close()
     }
