@@ -1,4 +1,7 @@
-@file:Suppress("UNUSED_VARIABLE")
+@file:Suppress(
+    "UNUSED_VARIABLE",
+    "SuspiciousCollectionReassignment"
+)
 
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
 
@@ -42,6 +45,7 @@ kotlin {
         }
         binaries {
             executable {
+                freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
                 entryPoint = "resharker.cli.main"
             }
         }
