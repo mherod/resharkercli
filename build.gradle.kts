@@ -4,6 +4,9 @@
 )
 
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
+import org.jetbrains.kotlin.gradle.dsl.KotlinCommonOptions
+import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
+import org.jetbrains.kotlin.gradle.plugin.KotlinCompilationToRunnableFiles
 
 plugins {
     kotlin("multiplatform") version "1.4.30-M1"
@@ -70,13 +73,28 @@ kotlin {
             }
         }
         val nativeTest by getting
+        val jvmTest by getting {
+            dependencies {
+                implementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
+                implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
+                implementation("junit:junit:4.13")
+            }
+        }
     }
 }
 
-tasks.register<Copy>("installBinary") {
+task<Copy>("installBinary") {
     dependsOn(tasks.getByName("build"))
     from("$buildDir/bin/native/releaseExecutable/")
     include("**/*.kexe")
     rename { it.substringBefore('.') }
     into("/usr/local/bin/")
+}
+
+task<JavaExec>("run") {
+    main = "resharker.cli.MainKt"
+    val jvm by kotlin.targets.getting
+    val main: KotlinCompilation<KotlinCommonOptions> by jvm.compilations
+    val runtimeDependencies = (main as KotlinCompilationToRunnableFiles<KotlinCommonOptions>).runtimeDependencyFiles
+    classpath = files(main.output.allOutputs, runtimeDependencies)
 }
