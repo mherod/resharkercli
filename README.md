@@ -1,9 +1,12 @@
 # resharkercli
 
 ## What is it?
-Resharker is a tool for Jira and Git, combining the common typical practices between each to automate common tasks a developer has to do regularly.
+Resharker is a tool for Jira and Git, combining common practices between each to automate typical tasks a developer has to do regularly.
 
 It is also serving an incubating project for Kotlin multiplatform clients for the Jira REST API and Git system tools. I'm also using it as a playground for learning how to build a solid Kotlin/Native CLI.
+
+## Why resharker?
+Keeping Jira tickets up to date was known as 'sharking', it's also a small riff on the name given to a popular set of .NET refactoring tools!
 
 ## Quick Start
 
