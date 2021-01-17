@@ -1,10 +1,10 @@
 package resharker.cli
 
-inline infix fun String.requireMatch(regexString: String) = require(matches(regexString.toRegex())) {
-    "$this must satisfy $regexString"
+inline infix fun String.requireMatch(regex: Regex) = require(matches(regex)) {
+    "$this must satisfy $regex"
 }
 
-fun String.extract(regex: String) = regex.toRegex().find(this)?.value
+fun String.extract(regex: Regex) = regex.find(this)?.value
 
 fun String.toInitialism() = split("\\s".toRegex())
     .filter { it.isNotBlank() }

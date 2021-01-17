@@ -1,5 +1,6 @@
 package resharker.cli
 
+import io.ktor.http.*
 import kotlinx.coroutines.flow.*
 import resharker.git.GitClient
 import resharker.jiracli.IJiraClient
@@ -16,8 +17,13 @@ class ResharkerCli(
     fun currentBranchKey(): String = parseKey(input = gitClient.getCurrentBranch())
 
     suspend fun openCurrentBranchIssue() {
-        val self = jiraClient.getIssue(key = currentBranchKey()).self
-        exec("open \"$self\"")
+        val currentBranchKey = currentBranchKey()
+        val urlRoot = jiraClient.getIssue(key = currentBranchKey).self
+        val url = URLBuilder(urlRoot)
+            .path("browse", currentBranchKey)
+            .build()
+        println("Opening \"$url\"")
+        exec("open \"$url\"")
     }
 
     suspend fun outputProjectList() {
@@ -85,7 +91,7 @@ class ResharkerCli(
     private fun extractIssueKeys(
         dirtyInput: String,
         projectKeys: Set<String>,
-    ) = issueKeyRegex.toRegex()
+    ) = issueKeyRegex
         .findAll(dirtyInput)
         .flatMap { it.groupValues }
         .distinct()
