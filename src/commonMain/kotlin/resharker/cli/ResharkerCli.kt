@@ -117,7 +117,7 @@ class ResharkerCli(
 
 fun ResharkerCli.outputCurrentBranchKey() = println(currentBranchKey())
 
-inline fun hasMainBranchName(): (String) -> Boolean = { branchInput ->
+fun hasMainBranchName(): (String) -> Boolean = { branchInput ->
     branchInput.substringAfter('/') in arrayOf(
         "main",
         "master"

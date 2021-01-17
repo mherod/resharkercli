@@ -1,6 +1,6 @@
 package resharker.cli
 
-inline infix fun String.requireMatch(regex: Regex) = require(matches(regex)) {
+infix fun String.requireMatch(regex: Regex) = require(matches(regex)) {
     "$this must satisfy $regex"
 }
 
