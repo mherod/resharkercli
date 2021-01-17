@@ -5,7 +5,7 @@ import resharker.cli.requireEnv
 
 fun createJiraClient(): IJiraClient = object : IJiraClient {
 
-    private val delegate: IJiraClient by lazy {
+    private val jiraClientLazy: Lazy<JiraClient> = lazy {
         JiraClient(
             rootUrl = requireEnv("JIRA_ROOT").also { rootUrl ->
                 require(isValidUrl(rootUrl)) {
@@ -19,11 +19,17 @@ fun createJiraClient(): IJiraClient = object : IJiraClient {
         )
     }
 
+    private val delegate: IJiraClient by jiraClientLazy
+
     override suspend fun listProjects(): ArrayList<JiraProject.JiraProjectItem> = delegate.listProjects()
 
     override suspend fun getProject(id: String): JiraProject.JiraProjectItem = delegate.getProject(id)
 
     override suspend fun getIssue(key: String): JiraIssue = delegate.getIssue(key)
 
-    override fun close() = delegate.close()
+    override fun close() {
+        if (jiraClientLazy.isInitialized()) {
+            delegate.close()
+        }
+    }
 }
