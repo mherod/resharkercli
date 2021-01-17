@@ -46,14 +46,14 @@ class JiraClient(
             path("rest", "api", "3", "search")
             parameters.append("jql", "project = $projectKey")
         }
-        configRequest()
     }
 
     override suspend fun getIssue(key: String): JiraRest2Issue {
         key requireMatch issueKeyRegex
         return httpClient.request {
-            url("$rootUrl/rest/api/2/issue/${key}")
-            configRequest()
+            jiraRestUrl {
+                path("rest", "api", "2", "issue", key)
+            }
         }
     }
 
@@ -62,7 +62,6 @@ class JiraClient(
             path("rest", "api", "3", "search")
             parameters.append("jql", jql)
         }
-        configRequest()
     }
 
     override fun close() {
