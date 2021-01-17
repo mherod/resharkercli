@@ -72,6 +72,11 @@ kotlin {
                 implementation("io.ktor:ktor-client-curl:$ktorVersion")
             }
         }
+        val jvmMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
+            }
+        }
         val nativeTest by getting
         val jvmTest by getting {
             dependencies {
@@ -92,6 +97,7 @@ task<Copy>("installBinary") {
 }
 
 task<JavaExec>("run") {
+    dependsOn(tasks.getByName("build"))
     main = "resharker.cli.MainKt"
     val jvm by kotlin.targets.getting
     val main: KotlinCompilation<KotlinCommonOptions> by jvm.compilations

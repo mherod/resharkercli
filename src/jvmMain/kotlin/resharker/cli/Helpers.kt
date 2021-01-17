@@ -9,7 +9,9 @@ actual inline fun mainBlock(crossinline block: suspend CoroutineScope.() -> Unit
     kotlinx.coroutines.runBlocking {
         runCatching { block() }
             .onFailure { throwable ->
-                println("fatal: ${throwable.message?.substringAfter("fatal:")?.trim()}")
+                val message = throwable.message ?: throwable.cause?.message
+                println("fatal: ${message?.substringAfter("fatal:")?.trim()}")
+                throwable.printStackTrace()
             }
             .onFailure { exitProcess(1) }
             .onSuccess { exitProcess(0) }
