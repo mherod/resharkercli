@@ -2,24 +2,22 @@ package resharker.cli
 
 import kotlinx.coroutines.flow.*
 import resharker.git.GitClient
-import resharker.jiracli.JiraClient
+import resharker.jiracli.IJiraClient
 import resharker.jiracli.JiraIssue
+import resharker.jiracli.getProjectKeys
 
 class ResharkerCli(
     private val gitClient: GitClient,
-    private val jiraClient: JiraClient,
+    private val jiraClient: IJiraClient,
 ) {
-
-    fun greeting() {
-        println("Branch key: ${parseKey(input = gitClient.getCurrentBranch())}")
-    }
 
     fun outputParsedKey(input: String) = println(parseKey(input))
 
-    fun outputCurrentBranchKey() = println(parseKey(input = gitClient.getCurrentBranch()))
+    fun currentBranchKey(): String = parseKey(input = gitClient.getCurrentBranch())
 
-    fun help() {
-        TODO("Not yet implemented")
+    suspend fun openCurrentBranchIssue() {
+        val self = jiraClient.getIssue(key = currentBranchKey()).self
+        exec("open \"$self\"")
     }
 
     suspend fun outputProjectList() {
@@ -113,13 +111,11 @@ class ResharkerCli(
     }
 }
 
+fun ResharkerCli.outputCurrentBranchKey() = println(currentBranchKey())
+
 inline fun hasMainBranchName(): (String) -> Boolean = { branchInput ->
     branchInput.substringAfter('/') in arrayOf(
         "main",
         "master"
     )
-}
-
-suspend inline fun JiraClient.getProjectKeys(): Set<String> {
-    return listProjects().map { it.key.toUpperCase() }.toSet()
 }

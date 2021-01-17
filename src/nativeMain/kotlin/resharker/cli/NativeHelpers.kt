@@ -13,7 +13,9 @@ inline fun requireEnv(key: String): String {
 
 fun nativeMain(block: suspend CoroutineScope.() -> Unit): Unit = runBlocking {
     runCatching { block() }
-        .onFailure { println(it.message) }
+        .onFailure { throwable ->
+            println("fatal: ${throwable.message?.substringAfter("fatal:")?.trim()}")
+        }
         .onFailure { exit(1) }
         .onSuccess { exit(0) }
 }
