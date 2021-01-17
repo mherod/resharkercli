@@ -88,10 +88,20 @@ kotlin {
     }
 }
 
+task<Exec>("cleanVcs") {
+    workingDir(projectDir)
+    inputs.files(fileTree(projectDir))
+    outputs.files(fileTree(projectDir))
+    "git clean -fXd $projectDir/"
+    commandLine("git", "clean", "-fXd", "$projectDir/")
+}
+
 task<Exec>("cleanEmptyDirs") {
-    inputs.files(fileTree("src"))
-    outputs.files(fileTree("src"))
-    commandLine("find", "$projectDir/src/", "-type", "d", "-empty", "-delete")
+    workingDir(projectDir)
+    val projectSrc = "$projectDir/src/"
+    inputs.files(fileTree(projectSrc))
+    outputs.files(fileTree(projectSrc))
+    commandLine("find", projectSrc, "-type", "d", "-empty", "-delete")
 }
 
 task<Copy>("installBinary") {
