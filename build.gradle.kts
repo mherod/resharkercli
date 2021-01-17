@@ -99,6 +99,7 @@ task<Copy>("installBinary") {
 task<JavaExec>("run") {
     dependsOn(tasks.getByName("build"))
     main = "resharker.cli.MainKt"
+    args("--help")
     val jvm by kotlin.targets.getting
     val main: KotlinCompilation<KotlinCommonOptions> by jvm.compilations
     val runtimeDependencies = (main as KotlinCompilationToRunnableFiles<KotlinCommonOptions>).runtimeDependencyFiles
