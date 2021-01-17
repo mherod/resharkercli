@@ -97,7 +97,7 @@ task<Copy>("installBinary") {
 }
 
 task<JavaExec>("run") {
-    dependsOn(tasks.getByName("build"))
+    dependsOn(tasks.getByName("jvmMainClasses"))
     main = "resharker.cli.MainKt"
     args("--help")
     val jvm by kotlin.targets.getting
