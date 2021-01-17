@@ -3,7 +3,6 @@ package resharker.cli
 import kotlinx.cli.ArgType
 import kotlinx.cli.ExperimentalCli
 import kotlinx.cli.Subcommand
-import kotlinx.coroutines.runBlocking
 
 @ExperimentalCli
 class ParseSubcommand(val resharker: ResharkerCli) : Subcommand(

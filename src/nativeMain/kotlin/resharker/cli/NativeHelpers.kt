@@ -7,11 +7,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import platform.posix.*
 
-inline fun requireEnv(key: String): String {
+actual inline fun requireEnv(key: String): String {
     return requireNotNull(getenv(key)) { "Environmental variable $key is required" }.toKString()
 }
 
-fun nativeMain(block: suspend CoroutineScope.() -> Unit): Unit = runBlocking {
+actual inline fun mainBlock(crossinline block: suspend CoroutineScope.() -> Unit): Unit = runBlocking {
     runCatching { block() }
         .onFailure { throwable ->
             println("fatal: ${throwable.message?.substringAfter("fatal:")?.trim()}")
@@ -21,7 +21,7 @@ fun nativeMain(block: suspend CoroutineScope.() -> Unit): Unit = runBlocking {
 }
 
 @OptIn(ExperimentalIoApi::class)
-fun exec(command: String): String = popen(command, "r")?.use { readToBuffer(it, pclose = true) }.toString()
+actual fun exec(command: String): String = popen(command, "r")?.use { readToBuffer(it, pclose = true) }.toString()
 
 @OptIn(ExperimentalIoApi::class)
 fun readFile(path: String): String = fopen(path, "r")?.use { readToBuffer(it) }.toString()

@@ -28,6 +28,8 @@ repositories {
 }
 
 kotlin {
+    jvm()
+
     val hostOs = System.getProperty("os.name")
     val isMingwX64 = hostOs.startsWith("Windows")
     val nativeTarget = when {
@@ -52,13 +54,19 @@ kotlin {
     }
 
     sourceSets {
-        val nativeMain by getting {
+        val commonMain by getting {
             dependencies {
-                api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion-native-mt")
+                implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3")
+//                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
-                implementation("io.ktor:ktor-client-curl:$ktorVersion")
                 implementation("io.ktor:ktor-client-json:$ktorVersion")
                 implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+            }
+        }
+        val nativeMain by getting {
+            dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion-native-mt")
+                implementation("io.ktor:ktor-client-curl:$ktorVersion")
             }
         }
         val nativeTest by getting

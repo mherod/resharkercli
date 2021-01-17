@@ -83,7 +83,7 @@ class ResharkerCli(
         val issueKey = input.extract(issueKeyRegex)?.correctIssueKey()
         val enclose = input.extract(enclosedKeyRegex)
         val guess = input.extract(otherwiseRegex)
-        return (issueKey ?: enclose ?: guess ?: input).trim { it.isLetterOrDigit().not() }
+        return (issueKey ?: enclose ?: guess ?: input).trim { it.isLetterOrDigit1().not() }
     }
 
     private fun extractIssueKeys(
@@ -94,7 +94,7 @@ class ResharkerCli(
         .flatMap { it.groupValues }
         .distinct()
         .map { it.correctIssueKey(projectKeys = projectKeys) }
-        .map { key -> key.trim { !it.isLetterOrDigit() } }
+        .map { key -> key.trim { !it.isLetterOrDigit1() } }
         .distinct()
         .toSet()
 
@@ -102,7 +102,7 @@ class ResharkerCli(
         projectKeys: Set<String> = emptySet(),
     ): String {
         val project = substringBefore('-').toUpperCase()
-        val issueNum = substringAfter('-').trim { !it.isDigit() }
+        val issueNum = substringAfter('-').trim { !it.isDigit1() }
         return when {
             project in projectKeys -> "$project-$issueNum"
             projectKeys.isEmpty() -> "$project-$issueNum"
@@ -114,8 +114,6 @@ class ResharkerCli(
         }
     }
 }
-
-fun ResharkerCli.outputParsedKey(input: String) = println(parseKey(input))
 
 fun ResharkerCli.outputCurrentBranchKey() = println(currentBranchKey())
 

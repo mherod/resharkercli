@@ -2,7 +2,6 @@ package resharker.cli
 
 import kotlinx.cli.ExperimentalCli
 import kotlinx.cli.Subcommand
-import kotlinx.coroutines.runBlocking
 
 @ExperimentalCli
 class CurrentSubcommand(
