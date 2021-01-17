@@ -27,7 +27,5 @@ class ProjectSubcommand(
         }
     }
 
-    override fun execute() {
-        TODO("Not yet implemented")
-    }
+    override fun execute() = Unit
 }
