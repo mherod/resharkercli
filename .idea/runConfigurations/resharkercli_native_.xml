@@ -1,0 +1,27 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="resharkercli[native]" type="GradleKonanAppRunConfiguration" factoryName="BinaryRunConfigurationFactory_GradleKonanAppRunConfiguration" directory="$PROJECT_DIR$" passPaternalEnvs="true" parameters="">
+    <executable target="macos_x64" targetName="native" execName="resharkercli" projectPrefix="resharkercli:" isTest="false">
+      <variants>
+        <variant name="Debug" gradleTask=":linkDebugExecutableNative" file="build/bin/native/debugExecutable/resharkercli.kexe">
+          <params workingDirectory="$PROJECT_DIR$" programParameters="">
+            <environmentVariables />
+          </params>
+        </variant>
+        <variant name="Release" gradleTask=":linkReleaseExecutableNative" file="build/bin/native/releaseExecutable/resharkercli.kexe">
+          <params workingDirectory="$PROJECT_DIR$" programParameters="">
+            <environmentVariables />
+          </params>
+        </variant>
+      </variants>
+    </executable>
+    <variant name="Debug" gradleTask=":linkDebugExecutableNative" file="build/bin/native/debugExecutable/resharkercli.kexe">
+      <params workingDirectory="$PROJECT_DIR$" programParameters="">
+        <environmentVariables />
+      </params>
+    </variant>
+    <environmentVariables />
+    <method v="2">
+      <option name="com.jetbrains.mpp.runconfig.BinaryBuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>
