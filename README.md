@@ -15,4 +15,4 @@ Install the executable binary
 git clone https://github.com/mherod/resharkercli.git && cd resharkercli && ./gradlew installBinary
 ```
 
-Then run `resharkercli` from your project directory
+Then run `resharkercli --help` from your project directory for a full list of options
