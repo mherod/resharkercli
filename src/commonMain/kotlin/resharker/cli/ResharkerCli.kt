@@ -3,9 +3,7 @@ package resharker.cli
 import io.ktor.http.*
 import kotlinx.coroutines.flow.*
 import resharker.git.GitClient
-import resharker.jiracli.IJiraClient
-import resharker.jiracli.JiraRest2Issue
-import resharker.jiracli.getProjectKeys
+import resharker.jiracli.*
 
 class ResharkerCli(
     private val gitClient: GitClient,
@@ -16,12 +14,8 @@ class ResharkerCli(
 
     suspend fun openCurrentBranchIssue() {
         val currentBranchKey = currentBranchKey()
-        val urlRoot = jiraClient.getIssue(key = currentBranchKey).self
-        val url = URLBuilder(urlRoot)
-            .path("browse", currentBranchKey)
-            .build()
-        println("Opening \"$url\"")
-        exec("open \"$url\"")
+        val issue = jiraClient.getIssue(key = currentBranchKey)
+        openBrowserForIssue(issue)
     }
 
     suspend fun outputProjectList() {
@@ -114,18 +108,32 @@ class ResharkerCli(
         }
     }
 
+    suspend fun queryIssuesJql(jql: String): List<JiraRest3Issue> {
+        return jiraClient.searchIssues(jql).issues
+    }
+
     suspend fun outputQueryResult(query: String) {
         jiraClient.searchIssues(query).let { result ->
+            val issues = result.issues
             when {
-                result.issues.isEmpty() -> {
+                issues.isEmpty() -> {
                     println("No results")
                 }
-                else -> result.issues.forEach { issue ->
+                else -> issues.forEach { issue ->
                     println("${issue.key} ${issue.fields.summary}")
                 }
             }
         }
     }
+}
+
+fun openBrowserForIssue(issue: JiraRestObject) {
+    val urlRoot = issue.self
+    val url = URLBuilder(urlRoot)
+        .path("browse", issue.key)
+        .build()
+    println("Opening \"$url\"")
+    exec("open \"$url\"")
 }
 
 fun ResharkerCli.outputCurrentBranchKey() = println(currentBranchKey())

@@ -10,12 +10,12 @@ data class JiraRest2Issue(
     @SerialName("fields")
     val fields: Fields,
     @SerialName("id")
-    val id: String,
+    override val id: String,
     @SerialName("key")
-    val key: String,
+    override val key: String,
     @SerialName("self")
-    val self: String,
-) {
+    override val self: String,
+) : JiraRestObject {
     @Serializable
     data class Fields(
         @SerialName("aggregateprogress")
