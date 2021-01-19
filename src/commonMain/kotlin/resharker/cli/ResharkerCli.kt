@@ -2,6 +2,7 @@ package resharker.cli
 
 import io.ktor.http.*
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.withTimeoutOrNull
 import resharker.git.GitClient
 import resharker.git.model.Commitish
 import resharker.git.model.toRef
@@ -11,6 +12,20 @@ class ResharkerCli(
     private val git: GitClient,
     private val jira: IJiraClient,
 ) {
+
+    suspend fun checkoutBranch(issueKey: String) {
+        parseKey(issueKey).let { key ->
+            val summary = jira.getIssue(key)
+                .fields
+                .summary
+                .toLowerCase()
+                .replace("\\s+".toRegex(), "-")
+            val newBranchName = "feature/${key}_$summary"
+            if (git.checkout(name = newBranchName, newBranch = true)) {
+                git.push(branch = newBranchName)
+            }
+        }
+    }
 
     fun currentBranchKey(): String = parseKey(input = git.getCurrentBranch())
 
@@ -82,6 +97,10 @@ class ResharkerCli(
         return (issueKey ?: enclose ?: guess ?: s).trim { it.isLetterOrDigit1().not() }
     }
 
+    private fun projectKeys() = runBlocking {
+        withTimeoutOrNull(2_000) { jira.getProjectKeys() }.orEmpty().toSet()
+    }
+
     private fun extractIssueKeys(
         dirtyInput: String,
         projectKeys: Set<String>,
@@ -95,7 +114,7 @@ class ResharkerCli(
         .toSet()
 
     private tailrec fun String.correctIssueKey(
-        projectKeys: Set<String> = emptySet(),
+        projectKeys: Set<String> = projectKeys(),
     ): String {
         val project = substringBefore('-').toUpperCase()
         val issueNum = substringAfter('-').trim { !it.isDigit1() }

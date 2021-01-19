@@ -18,6 +18,10 @@ interface GitClient {
 
     fun getToolVersion(): String
 
+    fun checkout(name: String, newBranch: Boolean = false): Boolean
+
+    fun push(remote: RemoteName = remote().list().single(), branch: String)
+
     fun listBranches(remote: Boolean = false): Set<Commitish>
 
     @Deprecated(

@@ -9,6 +9,27 @@ class GitSystemClient : GitClient {
             .let { "\\S*\\d+\\S*".toRegex().find(it)?.value ?: it }
     }
 
+    override fun checkout(name: String, newBranch: Boolean): Boolean {
+        return runCatching {
+            exec(
+                command = StringBuilder("git checkout")
+                    .apply {
+                        if (newBranch) {
+                            append(" -b")
+                        }
+                        append(" $name")
+                    }.toString()
+            ).let { output ->
+                check(!output.startsWith("fatal:"))
+            }
+            true
+        }.getOrDefault(false)
+    }
+
+    override fun push(remote: RemoteName, branch: String) {
+        exec("git push ${remote.name} $branch")
+    }
+
     override fun getCurrentBranch(): Commitish {
         return exec("git rev-parse --abbrev-ref HEAD").trim()
             .also { check(it.isNotBlank()) }

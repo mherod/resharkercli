@@ -1,6 +1,8 @@
 package resharker.git.model
 
-inline class RemoteName(override val name: String) : ProvidesName
+inline class RemoteName(override val name: String) : ProvidesName {
+    override fun toString(): String = name
+}
 
 @Suppress("unused")
 val origin = RemoteName("origin")

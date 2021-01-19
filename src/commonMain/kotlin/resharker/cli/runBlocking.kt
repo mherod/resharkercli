@@ -2,4 +2,4 @@ package resharker.cli
 
 import kotlinx.coroutines.CoroutineScope
 
-expect inline fun runBlocking(noinline block: suspend CoroutineScope.() -> Unit)
+expect inline fun <T : Any> runBlocking(noinline block: suspend CoroutineScope.() -> T): T

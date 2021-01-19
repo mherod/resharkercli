@@ -21,7 +21,18 @@ actual inline fun mainBlock(crossinline block: suspend CoroutineScope.() -> Unit
 }
 
 @OptIn(ExperimentalIoApi::class)
-actual fun exec(command: String): String = popen(command, "r")?.use { readToBuffer(it, pclose = true) }.toString()
+actual fun exec(command: String): String {
+//    println(">> $command")
+    return popen(command, "r")?.use { pointer ->
+        readToBuffer(
+            file = pointer,
+            pclose = true
+        )
+    }.toString()
+//        .also { out ->
+//            println("<< $out")
+//        }
+}
 
 @OptIn(ExperimentalIoApi::class)
 fun readFile(path: String): String = fopen(path, "r")?.use { readToBuffer(it) }.toString()
