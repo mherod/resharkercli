@@ -8,14 +8,15 @@ data class JiraRest3Issue(
     @SerialName("expand")
     val expand: String,
     @SerialName("fields")
-    val fields: Fields,
+    override val fields: Fields,
     @SerialName("id")
     override val id: String,
     @SerialName("key")
     override val key: String,
     @SerialName("self")
     override val self: String,
-): JiraRestObject {
+) : JiraRestIssue {
+
     @Serializable
     data class Fields(
         @SerialName("aggregateprogress")
@@ -67,11 +68,11 @@ data class JiraRest3Issue(
         @SerialName("security")
         val security: String? = null,
         @SerialName("status")
-        val status: Status,
+        override val status: Status,
         @SerialName("statuscategorychangedate")
         val statuscategorychangedate: String,
         @SerialName("summary")
-        val summary: String = "",
+        override val summary: String = "",
         @SerialName("timeestimate")
         val timeestimate: Int? = null,
         @SerialName("timeoriginalestimate")
@@ -90,7 +91,7 @@ data class JiraRest3Issue(
         val watches: Watches,
         @SerialName("workratio")
         val workratio: Int? = null,
-    ) {
+    ) : JiraRestIssueFields {
         @Serializable
         data class AggregateProgress(
             @SerialName("percent")
@@ -146,13 +147,13 @@ data class JiraRest3Issue(
         @Serializable
         data class Comment(
             @SerialName("self")
-            val self: String
+            val self: String,
         )
 
         @Serializable
         data class Attachments(
             @SerialName("self")
-            val self: String
+            val self: String,
         )
 
         @Serializable
@@ -427,12 +428,13 @@ data class JiraRest3Issue(
             @SerialName("id")
             val id: String,
             @SerialName("name")
-            val name: String,
+            override val name: String,
             @SerialName("self")
             val self: String,
             @SerialName("statusCategory")
             val statusCategory: StatusCategory,
-        ) {
+        ) : JiraRestIssueStatus {
+
             @Serializable
             data class StatusCategory(
                 @SerialName("colorName")
@@ -495,7 +497,7 @@ data class JiraRest3Issue(
         @Serializable
         data class WorklogItem(
             @SerialName("self")
-            val self: String
+            val self: String,
         )
     }
 }

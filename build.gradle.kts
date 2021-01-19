@@ -92,6 +92,9 @@ kotlin {
                 implementation("junit:junit:4.13")
             }
         }
+        all {
+            languageSettings.enableLanguageFeature("InlineClasses")
+        }
     }
 }
 
@@ -99,7 +102,6 @@ task<Exec>("cleanVcs") {
     workingDir(projectDir)
     inputs.files(fileTree(projectDir))
     outputs.files(fileTree(projectDir))
-    "git clean -fXd $projectDir/"
     commandLine("git", "clean", "-fXd", "$projectDir/")
 }
 

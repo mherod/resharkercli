@@ -3,6 +3,8 @@ package resharker.cli
 import io.ktor.http.*
 import kotlinx.coroutines.flow.*
 import resharker.git.GitClient
+import resharker.git.model.Commitish
+import resharker.git.model.toRef
 import resharker.jiracli.*
 
 class ResharkerCli(
@@ -13,9 +15,9 @@ class ResharkerCli(
     fun currentBranchKey(): String = parseKey(input = gitClient.getCurrentBranch())
 
     suspend fun openCurrentBranchIssue() {
-        val currentBranchKey = currentBranchKey()
-        val issue = jiraClient.getIssue(key = currentBranchKey)
-        openBrowserForIssue(issue)
+        openBrowserForIssue(
+            issue = jiraClient.getIssue(key = currentBranchKey())
+        )
     }
 
     suspend fun outputProjectList() {
@@ -33,19 +35,18 @@ class ResharkerCli(
     suspend fun outputReleaseNotes() {
 
         val branch = gitClient.getCurrentBranch()
-        val lastTag = gitClient.getLastTag(from = detectMainBranch())
+        val lastTag = gitClient.describe(commitish = detectMainBranch())
 
         println("Changes since $lastTag on branch $branch")
 
         val issueKeys = extractIssueKeys(
-            dirtyInput = gitClient.getLogDiff(since = lastTag),
+            dirtyInput = gitClient.getLogDiff(since = lastTag.toRef()),
             projectKeys = jiraClient.getProjectKeys()
         )
 
         getJiraIssues(issueKeys = issueKeys)
-            .map { issue ->
-                "\t${issue.key} ${issue.fields.summary} (${issue.fields.status.name})"
-            }.distinctUntilChanged()
+            .map { it.summaryString() }
+            .distinctUntilChanged()
             .collect { println(it) }
     }
 
@@ -57,10 +58,10 @@ class ResharkerCli(
             .distinctUntilChanged()
     }
 
-    private fun detectMainBranch(): String {
+    private fun detectMainBranch(): Commitish {
         return gitClient.listBranches(remote = true)
             .filter(hasMainBranchName())
-            .minByOrNull(String::length)
+            .minByOrNull(Commitish::length)
             ?: error("Couldn't determine main branch")
     }
 
@@ -72,12 +73,13 @@ class ResharkerCli(
         jiraClient.close()
     }
 
-    fun parseKey(input: String): String {
-        require(input.isNotBlank())
-        val issueKey = input.extract(issueKeyRegex)?.correctIssueKey()
-        val enclose = input.extract(enclosedKeyRegex)
-        val guess = input.extract(otherwiseRegex)
-        return (issueKey ?: enclose ?: guess ?: input).trim { it.isLetterOrDigit1().not() }
+    fun parseKey(input: Any): String {
+        val s = input.toString()
+        require(s.isNotBlank())
+        val issueKey = s.extract(issueKeyRegex)?.correctIssueKey()
+        val enclose = s.extract(enclosedKeyRegex)
+        val guess = s.extract(otherwiseRegex)
+        return (issueKey ?: enclose ?: guess ?: s).trim { it.isLetterOrDigit1().not() }
     }
 
     private fun extractIssueKeys(
@@ -120,14 +122,18 @@ class ResharkerCli(
                     println("No results")
                 }
                 else -> issues.forEach { issue ->
-                    println("${issue.key} ${issue.fields.summary}")
+                    println(issue.summaryString())
                 }
             }
         }
     }
+
+    private fun JiraRestIssue.summaryString(): String {
+        return "\t$key ${fields.summary} (${fields.status.name})"
+    }
 }
 
-fun openBrowserForIssue(issue: JiraRestObject) {
+fun openBrowserForIssue(issue: JiraRestIssue) {
     val urlRoot = issue.self
     val url = URLBuilder(urlRoot)
         .path("browse", issue.key)
@@ -138,8 +144,8 @@ fun openBrowserForIssue(issue: JiraRestObject) {
 
 fun ResharkerCli.outputCurrentBranchKey() = println(currentBranchKey())
 
-fun hasMainBranchName(): (String) -> Boolean = { branchInput ->
-    branchInput.substringAfter('/') in arrayOf(
+fun hasMainBranchName(): (Commitish) -> Boolean = { branchInput ->
+    branchInput.ref.substringAfter('/') in arrayOf(
         "main",
         "master"
     )

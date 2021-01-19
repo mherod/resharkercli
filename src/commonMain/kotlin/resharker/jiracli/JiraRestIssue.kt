@@ -1,9 +1,12 @@
 package resharker.jiracli
 
-interface JiraRestObject {
+interface JiraRestIssue {
+
     val id: String
 
     val key: String
 
     val self: String
+
+    val fields: JiraRestIssueFields
 }
