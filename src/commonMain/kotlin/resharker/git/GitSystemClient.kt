@@ -1,10 +1,7 @@
 package resharker.git
 
 import resharker.cli.exec
-import resharker.git.model.Commitish
-import resharker.git.model.ProvidesRef
-import resharker.git.model.toRef
-import resharker.git.model.toRefs
+import resharker.git.model.*
 
 class GitSystemClient : GitClient {
     override fun getToolVersion(): String {
@@ -28,12 +25,18 @@ class GitSystemClient : GitClient {
             .toSet()
     }
 
-    override fun listRemotes(): Set<String> {
-        return exec("git remote").split("[\\n|\\s]".toRegex())
+    override fun listRemotes(): Set<RemoteName> = remote().list()
+
+    inner class GitSystemRemote : GitClient.Remote {
+        override fun list(): Set<RemoteName> = exec("git remote")
+            .split("[\\n|\\s]".toRegex())
             .map { it.trim() }
             .filter { it.isNotBlank() }
+            .map(::RemoteName)
             .toSet()
     }
+
+    override fun remote(): GitClient.Remote = GitSystemRemote()
 
     override fun describe(commitish: Commitish, abbrev: Int): String {
         return exec("git describe $commitish --tags --abbrev=$abbrev").trim()

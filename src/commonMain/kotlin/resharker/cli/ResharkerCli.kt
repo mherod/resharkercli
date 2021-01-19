@@ -8,20 +8,20 @@ import resharker.git.model.toRef
 import resharker.jiracli.*
 
 class ResharkerCli(
-    private val gitClient: GitClient,
-    private val jiraClient: IJiraClient,
+    private val git: GitClient,
+    private val jira: IJiraClient,
 ) {
 
-    fun currentBranchKey(): String = parseKey(input = gitClient.getCurrentBranch())
+    fun currentBranchKey(): String = parseKey(input = git.getCurrentBranch())
 
     suspend fun openCurrentBranchIssue() {
         openBrowserForIssue(
-            issue = jiraClient.getIssue(key = currentBranchKey())
+            issue = jira.getIssue(key = currentBranchKey())
         )
     }
 
     suspend fun outputProjectList() {
-        jiraClient.listProjects().forEach {
+        jira.listProjects().forEach {
             val key = it.key
             val name = it.name.trim()
             println(when (key) {
@@ -34,14 +34,14 @@ class ResharkerCli(
 
     suspend fun outputReleaseNotes() {
 
-        val branch = gitClient.getCurrentBranch()
-        val lastTag = gitClient.describe(commitish = detectMainBranch())
+        val branch = git.getCurrentBranch()
+        val lastTag = git.describe(commitish = detectMainBranch())
 
         println("Changes since $lastTag on branch $branch")
 
         val issueKeys = extractIssueKeys(
-            dirtyInput = gitClient.getLogDiff(since = lastTag.toRef()),
-            projectKeys = jiraClient.getProjectKeys()
+            dirtyInput = git.getLogDiff(since = lastTag.toRef()),
+            projectKeys = jira.getProjectKeys()
         )
 
         getJiraIssues(issueKeys = issueKeys)
@@ -54,23 +54,23 @@ class ResharkerCli(
         return issueKeys.sorted()
             .asFlow()
             .distinctUntilChanged()
-            .map { jiraClient.getIssue(it) }
+            .map { jira.getIssue(it) }
             .distinctUntilChanged()
     }
 
     private fun detectMainBranch(): Commitish {
-        return gitClient.listBranches(remote = true)
+        return git.listBranches(remote = true)
             .filter(hasMainBranchName())
             .minByOrNull(Commitish::length)
             ?: error("Couldn't determine main branch")
     }
 
     fun outputVersion() {
-        println("Git version: ${gitClient.getToolVersion()}")
+        println("Git version: ${git.getToolVersion()}")
     }
 
     fun close() {
-        jiraClient.close()
+        jira.close()
     }
 
     fun parseKey(input: Any): String {
@@ -111,11 +111,11 @@ class ResharkerCli(
     }
 
     suspend fun queryIssuesJql(jql: String): List<JiraRest3Issue> {
-        return jiraClient.searchIssues(jql).issues
+        return jira.searchIssues(jql).issues
     }
 
     suspend fun outputQueryResult(query: String) {
-        jiraClient.searchIssues(query).let { result ->
+        jira.searchIssues(query).let { result ->
             val issues = result.issues
             when {
                 issues.isEmpty() -> {
