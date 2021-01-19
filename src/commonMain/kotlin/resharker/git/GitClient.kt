@@ -20,6 +20,11 @@ interface GitClient {
 
     fun listBranches(remote: Boolean = false): Set<Commitish>
 
+    @Deprecated(
+        message = "Use remote().list()",
+        replaceWith = ReplaceWith("remote().list()"),
+        level = DeprecationLevel.HIDDEN
+    )
     fun listRemotes(): Set<RemoteName>
 
     fun remote(): Remote
