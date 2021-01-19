@@ -9,8 +9,8 @@ import resharker.jiracli.createJiraClient
 class ApplicationArgParser : ArgParser(programName = "resharkercli") {
 
     private val resharker = ResharkerCli(
-        jiraClient = createJiraClient(),
-        gitClient = GitSystemClient()
+        jira = createJiraClient(),
+        git = GitSystemClient()
     )
 
     init {
