@@ -14,15 +14,17 @@ class ApplicationArgParser : ArgParser(programName = "resharkercli") {
     )
 
     init {
-        subcommands(
-            VersionSubcommand(resharker),
-            ProjectSubcommand(resharker),
-            CheckoutSubcommand(resharker),
-            CurrentSubcommand(resharker),
-            ReleaseSubcommand(resharker),
-            ParseSubcommand(resharker),
-            QuerySubcommand(resharker)
-        )
+        resharker.apply {
+            subcommands(
+                let(::VersionSubcommand),
+                let(::ProjectSubcommand),
+                let(::CheckoutSubcommand),
+                let(::CurrentSubcommand),
+                let(::ReleaseSubcommand),
+                let(::ParseSubcommand),
+                let(::QuerySubcommand),
+            )
+        }
     }
 
     fun close() {
