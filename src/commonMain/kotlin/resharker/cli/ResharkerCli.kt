@@ -14,7 +14,7 @@ class ResharkerCli(
 ) {
 
     suspend fun checkoutBranch(issueKey: String) {
-        parseKey(issueKey).let { key ->
+        parseKey(issueKey).let { key: String ->
             val summary = jira.getIssue(key)
                 .fields
                 .summary
@@ -27,7 +27,9 @@ class ResharkerCli(
         }
     }
 
-    fun currentBranchKey(): String = parseKey(input = git.getCurrentBranch())
+    fun currentBranchKey(): String {
+        return parseKey(input = git.getCurrentBranch())
+    }
 
     suspend fun openCurrentBranchIssue() {
         openBrowserForIssue(
@@ -36,9 +38,9 @@ class ResharkerCli(
     }
 
     suspend fun outputProjectList() {
-        jira.listProjects().forEach {
-            val key = it.key
-            val name = it.name.trim()
+        jira.listProjects().forEach { projectItem ->
+            val key = projectItem.key
+            val name = projectItem.name.trim()
             println(when (key) {
                 name -> key
                 name.toInitialism() -> "$key ($name)"
