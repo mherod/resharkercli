@@ -14,17 +14,30 @@ class ResharkerCli(
 ) {
 
     suspend fun checkoutBranch(issueKey: String) {
-        parseKey(issueKey).let { key: String ->
-            val summary = jira.getIssue(key)
-                .fields
-                .summary
-                .toLowerCase()
-                .replace("\\s+".toRegex(), "-")
-            val newBranchName = "feature/${key}_$summary"
-            if (git.checkout(name = newBranchName, newBranch = true)) {
+        parseKey(issueKey).let { parsedKey: String ->
+            val matchedBranch = matchBranch(parsedKey)
+            val summary = makeSummaryForBranch(parsedKey)
+            val newBranchName = "feature/${parsedKey}_$summary"
+            val create = matchedBranch == null
+            if (git.checkout(name = newBranchName, newBranch = create) && create) {
                 git.push(branch = newBranchName)
             }
         }
+    }
+
+    private fun matchBranch(issueKey: String): Commitish? {
+        issueKey requireMatch issueKeyRegex
+        return git.listBranches(remote = true)
+            .singleOrNull { parseKey(it) == issueKey }
+    }
+
+    private suspend fun makeSummaryForBranch(issueKey: String): String {
+        issueKey requireMatch issueKeyRegex
+        return jira.getIssue(issueKey)
+            .fields
+            .summary
+            .toLowerCase()
+            .replace("\\s+".toRegex(), "-")
     }
 
     fun currentBranchKey(): String {
