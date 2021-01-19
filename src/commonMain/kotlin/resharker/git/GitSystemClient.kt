@@ -4,8 +4,9 @@ import resharker.cli.exec
 import resharker.git.model.*
 
 class GitSystemClient : GitClient {
-    override fun getToolVersion(): String {
-        return exec("git version").trim()
+    override fun version(): String {
+        return exec("git version")
+            .trim()
             .let { "\\S*\\d+\\S*".toRegex().find(it)?.value ?: it }
     }
 
@@ -26,27 +27,50 @@ class GitSystemClient : GitClient {
         }.getOrDefault(false)
     }
 
-    override fun push(remote: RemoteName, branch: String) {
-        exec("git push ${remote.name} $branch")
+    override fun push(remote: RemoteName, branch: ProvidesRef) {
+        exec("git push ${remote.name} ${branch.ref}")
     }
 
-    override fun getCurrentBranch(): Commitish {
+    override fun getCurrentBranch(): ProvidesRef {
         return exec("git rev-parse --abbrev-ref HEAD").trim()
             .also { check(it.isNotBlank()) }
             .also { check(!it.startsWith("fatal:")) }
             .toRef()
     }
 
-    override fun listBranches(remote: Boolean): Set<Commitish> {
+    override fun listBranches(remote: Boolean): Set<ProvidesRef> {
         return exec("git branch${if (remote) " -r" else ""}")
             .split("[\\n|\\s]".toRegex())
             .map { it.trim() }
             .filter { it.isNotBlank() }
-            .toRefs<Commitish>()
+            .toRefs<ProvidesRef>()
             .toSet()
     }
 
-    override fun listRemotes(): Set<RemoteName> = remote().list()
+    override fun describe(commitish: Commitish, abbrev: Int): String {
+        return exec("git describe ${commitish.ref} --tags --abbrev=$abbrev").trim()
+            .also { check(it.isNotBlank()) }
+            .also { check(!it.startsWith("fatal:")) }
+    }
+
+    override fun log(range: RefRange): String = exec(
+        command = buildString {
+            append("git log")
+            append(" ${range.value}")
+            append(" --pretty=oneline")
+            append(" --abbrev-commit")
+        }
+    ).also { s ->
+        check(s.isNotBlank())
+        check(!s.startsWith("fatal:"))
+    }
+
+    override fun getLogDiff(
+        since: ProvidesRef,
+        until: ProvidesRef,
+    ): String = log(range = since..until)
+
+    override fun remote(): GitClient.Remote = GitSystemRemote()
 
     inner class GitSystemRemote : GitClient.Remote {
         override fun list(): Set<RemoteName> = exec("git remote")
@@ -55,19 +79,5 @@ class GitSystemClient : GitClient {
             .filter { it.isNotBlank() }
             .map(::RemoteName)
             .toSet()
-    }
-
-    override fun remote(): GitClient.Remote = GitSystemRemote()
-
-    override fun describe(commitish: Commitish, abbrev: Int): String {
-        return exec("git describe $commitish --tags --abbrev=$abbrev").trim()
-            .also { check(it.isNotBlank()) }
-            .also { check(!it.startsWith("fatal:")) }
-    }
-
-    override fun getLogDiff(since: ProvidesRef): String {
-        return exec("git log $since..HEAD --pretty=oneline --abbrev-commit")
-            .also { check(it.isNotBlank()) }
-            .also { check(!it.startsWith("fatal:")) }
     }
 }

@@ -1,40 +1,38 @@
+@file:Suppress("unused")
+
 package resharker.git
 
-import resharker.git.model.Commitish
-import resharker.git.model.HEAD
-import resharker.git.model.ProvidesRef
-import resharker.git.model.RemoteName
+import resharker.git.model.*
 
 interface GitClient {
 
-    fun getCurrentBranch(): Commitish
+    fun getCurrentBranch(): ProvidesRef
 
     fun describe(
         commitish: Commitish = HEAD,
         abbrev: Int = 0,
     ): String
 
-    fun getLogDiff(since: ProvidesRef): String
+    fun getLogDiff(since: ProvidesRef, until: ProvidesRef = "HEAD"): String
 
-    fun getToolVersion(): String
+    fun version(): String
 
     fun checkout(name: String, newBranch: Boolean = false): Boolean
 
-    fun push(remote: RemoteName = remote().list().single(), branch: String)
-
-    fun listBranches(remote: Boolean = false): Set<Commitish>
-
-    @Deprecated(
-        message = "Use remote().list()",
-        replaceWith = ReplaceWith("remote().list()"),
-        level = DeprecationLevel.HIDDEN
+    fun push(
+        remote: RemoteName = remote().list().single(),
+        branch: ProvidesRef = HEAD,
     )
-    fun listRemotes(): Set<RemoteName>
+
+    fun listBranches(remote: Boolean = false): Set<ProvidesRef>
 
     fun remote(): Remote
+    fun log(range: RefRange): String
 
     interface Remote {
         fun list(): Set<RemoteName>
     }
 }
+
+fun GitClient.listRemotes(): Set<RemoteName> = remote().list()
 

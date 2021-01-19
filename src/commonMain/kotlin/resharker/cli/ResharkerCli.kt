@@ -96,7 +96,7 @@ class ResharkerCli(
     }
 
     fun outputVersion() {
-        println("Git version: ${git.getToolVersion()}")
+        println("Git version: ${git.version()}")
     }
 
     fun close() {
