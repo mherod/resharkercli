@@ -4,7 +4,7 @@ import io.ktor.http.*
 import io.ktor.util.*
 
 @OptIn(InternalAPI::class)
-inline fun apiTokenCredentials(
+fun apiTokenCredentials(
     username: String,
     apiToken: String,
 ) = object : JiraCredentials {

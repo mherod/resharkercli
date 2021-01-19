@@ -93,7 +93,12 @@ kotlin {
             }
         }
         all {
-            languageSettings.enableLanguageFeature("InlineClasses")
+            languageSettings.apply {
+                apiVersion = "1.4"
+                enableLanguageFeature("InlineClasses")
+                useExperimentalAnnotation("kotlin.RequiresOptIn")
+                useExperimentalAnnotation("kotlinx.cli.ExperimentalCli")
+            }
         }
     }
 }
