@@ -7,6 +7,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import platform.posix.*
 
+val debugLogsEnabled: Boolean by lazy {
+    getenv("DEBUG_RESHARKERCLI")?.toKString().toBoolean()
+}
+
 actual inline fun requireEnv(key: String): String {
     return requireNotNull(getenv(key)) { "Environmental variable $key is required" }.toKString()
 }
@@ -22,16 +26,15 @@ actual inline fun mainBlock(crossinline block: suspend CoroutineScope.() -> Unit
 
 @OptIn(ExperimentalIoApi::class)
 actual fun exec(command: String): String {
-    println(">> $command")
+    if (debugLogsEnabled) println(">> $command")
     return popen(command, "r")?.use { pointer ->
         readToBuffer(
             file = pointer,
             pclose = true
         )
-    }.toString()
-        .also { out ->
-            println("<< ${out.ifBlank { "<< (blank)" }}")
-        }
+    }.toString().also { out ->
+        if (debugLogsEnabled) println("<< ${out.ifBlank { "<< (blank)" }}")
+    }
 }
 
 @OptIn(ExperimentalIoApi::class)
