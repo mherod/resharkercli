@@ -15,6 +15,12 @@ class ResharkerCli(
     private val newBranchRefMap = LinkedHashMap<String, Deferred<ProvidesRef>>(10)
 
     suspend fun checkoutBranch(issueKey: String) = coroutineScope {
+        val currentBranch = git.getCurrentBranch()
+        val currentBranchKey = parseKey(input = currentBranch)
+        if (currentBranchKey == issueKey) {
+            println("Already on '$currentBranch'")
+            return@coroutineScope
+        }
         val remotes = git.remote().list()
         val fetchJob = launch {
             if (remotes.isNotEmpty())
