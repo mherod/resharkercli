@@ -18,7 +18,9 @@ class GitSystemClient : GitClient {
                     if (newBranch) {
                         append(" -b")
                     }
-                    append(" $name")
+                    name ?.let {
+                        append(" ${it.ref}")
+                    }
                     track?.let {
                         append(" --track")
                         append(" ${it.ref}")
