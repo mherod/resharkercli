@@ -6,18 +6,27 @@ import resharker.git.model.*
 
 interface GitClient {
 
+    fun version(): String
+
     fun getCurrentBranch(): ProvidesRef
 
     fun describe(
-        commitish: Commitish = HEAD,
+        commitish: ProvidesRef = HEAD,
         abbrev: Int = 0,
     ): String
 
-    fun getLogDiff(since: ProvidesRef, until: ProvidesRef = "HEAD"): String
+    fun getLogDiff(
+        since: ProvidesRef,
+        until: ProvidesRef = HEAD,
+    ): String
 
-    fun version(): String
+    fun checkout(
+        name: ProvidesRef?,
+        newBranch: Boolean = false,
+        track: ProvidesRef? = null,
+    ): Boolean
 
-    fun checkout(name: String, newBranch: Boolean = false): Boolean
+    fun fetch(all: Boolean = false)
 
     fun push(
         remote: RemoteName = remote().list().single(),
@@ -26,8 +35,9 @@ interface GitClient {
 
     fun listBranches(remote: Boolean = false): Set<ProvidesRef>
 
-    fun remote(): Remote
     fun log(range: RefRange): String
+
+    fun remote(): Remote
 
     interface Remote {
         fun list(): Set<RemoteName>

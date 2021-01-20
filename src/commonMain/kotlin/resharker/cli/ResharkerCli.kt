@@ -1,11 +1,10 @@
 package resharker.cli
 
 import io.ktor.http.*
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.withTimeoutOrNull
 import resharker.git.GitClient
-import resharker.git.model.Commitish
-import resharker.git.model.toRef
+import resharker.git.model.*
 import resharker.jiracli.*
 
 class ResharkerCli(
@@ -13,22 +12,41 @@ class ResharkerCli(
     private val jira: IJiraClient,
 ) {
 
-    suspend fun checkoutBranch(issueKey: String) {
-        parseKey(issueKey).let { parsedKey: String ->
-            val matchedBranch = matchBranch(parsedKey)
-            val summary = makeSummaryForBranch(parsedKey)
-            val newBranchName = "feature/${parsedKey}_$summary"
-            val create = matchedBranch == null
-            if (git.checkout(name = newBranchName, newBranch = create) && create) {
-                git.push(branch = newBranchName)
+    private val newBranchRefMap = LinkedHashMap<String, Deferred<ProvidesRef>>(10)
+
+    suspend fun checkoutBranch(issueKey: String) = coroutineScope {
+        val remotes = git.remote().list()
+        val fetchJob = launch {
+            if (remotes.isNotEmpty())
+                git.fetch(all = true)
+        }
+        parseKey(issueKey).let { key: String ->
+            key requireMatch issueKeyRegex
+            fetchJob.join()
+            val matchedLocalBranch = git.listBranches(remote = false)
+                .singleOrNull { parseKey(it.ref) == key }
+            val matchedRemoteBranch = git.listBranches(remote = true)
+                .singleOrNull { parseKey(it.ref) == key }
+            val newBranch = matchedLocalBranch == null && matchedRemoteBranch == null
+            val newBranchRef: Deferred<ProvidesRef> = newBranchRefMap.getOrPut(key) {
+                "feature/${key}_${makeSummaryForBranch(key)}".toRef()
+            }
+            val checkout = git.checkout(
+                name = when {
+                    newBranch -> newBranchRef.await()
+                    else -> matchedLocalBranch
+                },
+                newBranch = newBranch,
+                track = when {
+                    newBranch -> remotes.single() + newBranchRef.await()
+                    matchedLocalBranch == null -> matchedRemoteBranch
+                    else -> null
+                }
+            )
+            if (checkout && newBranch) {
+                git.push(branch = newBranchRef.await())
             }
         }
-    }
-
-    private fun matchBranch(issueKey: String): Commitish? {
-        issueKey requireMatch issueKeyRegex
-        return git.listBranches(remote = true)
-            .singleOrNull { parseKey(it) == issueKey }
     }
 
     private suspend fun makeSummaryForBranch(issueKey: String): String {
@@ -88,8 +106,9 @@ class ResharkerCli(
             .distinctUntilChanged()
     }
 
-    private fun detectMainBranch(): Commitish {
+    private fun detectMainBranch(): ProvidesRef {
         return git.listBranches(remote = true)
+            .filterIsInstance<Commitish>()
             .filter(hasMainBranchName())
             .minByOrNull(Commitish::length)
             ?: error("Couldn't determine main branch")

@@ -10,21 +10,36 @@ class GitSystemClient : GitClient {
             .let { "\\S*\\d+\\S*".toRegex().find(it)?.value ?: it }
     }
 
-    override fun checkout(name: String, newBranch: Boolean): Boolean {
+    override fun checkout(name: ProvidesRef?, newBranch: Boolean, track: ProvidesRef?): Boolean {
         return runCatching {
             exec(
-                command = StringBuilder("git checkout")
-                    .apply {
-                        if (newBranch) {
-                            append(" -b")
-                        }
-                        append(" $name")
-                    }.toString()
+                command = buildString {
+                    append("git checkout")
+                    if (newBranch) {
+                        append(" -b")
+                    }
+                    append(" $name")
+                    track?.let {
+                        append(" --track")
+                        append(" ${it.ref}")
+                    }
+                }
             ).let { output ->
                 check(!output.startsWith("fatal:"))
             }
             true
         }.getOrDefault(false)
+    }
+
+    override fun fetch(all: Boolean) {
+        exec(
+            command = buildString {
+                append("git fetch")
+                if (all) {
+                    append(" --all")
+                }
+            }
+        )
     }
 
     override fun push(remote: RemoteName, branch: ProvidesRef) {
@@ -47,7 +62,7 @@ class GitSystemClient : GitClient {
             .toSet()
     }
 
-    override fun describe(commitish: Commitish, abbrev: Int): String {
+    override fun describe(commitish: ProvidesRef, abbrev: Int): String {
         return exec("git describe ${commitish.ref} --tags --abbrev=$abbrev").trim()
             .also { check(it.isNotBlank()) }
             .also { check(!it.startsWith("fatal:")) }

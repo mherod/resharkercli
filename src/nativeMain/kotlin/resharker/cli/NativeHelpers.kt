@@ -22,16 +22,16 @@ actual inline fun mainBlock(crossinline block: suspend CoroutineScope.() -> Unit
 
 @OptIn(ExperimentalIoApi::class)
 actual fun exec(command: String): String {
-//    println(">> $command")
+    println(">> $command")
     return popen(command, "r")?.use { pointer ->
         readToBuffer(
             file = pointer,
             pclose = true
         )
     }.toString()
-//        .also { out ->
-//            println("<< $out")
-//        }
+        .also { out ->
+            println("<< ${out.ifBlank { "<< (blank)" }}")
+        }
 }
 
 @OptIn(ExperimentalIoApi::class)

@@ -6,3 +6,4 @@ inline class RemoteName(override val name: String) : ProvidesName {
 
 @Suppress("unused")
 val origin = RemoteName("origin")
+operator fun RemoteName.plus(branch: ProvidesRef): ProvidesRef = Commitish("$name/${branch.ref}")
