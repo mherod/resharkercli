@@ -123,7 +123,7 @@ task<Exec>("cleanEmptyDirs") {
 task<Copy>("installBinary") {
     dependsOn(tasks.getByName("build"))
     from("$buildDir/bin/native/releaseExecutable/")
-    include("**/*.kexe")
+    include("*.kexe")
     rename { it.substringBefore('.') }
     into("/usr/local/bin/")
 }
