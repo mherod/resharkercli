@@ -10,9 +10,9 @@ Keeping Jira tickets up to date was once known as 'sharking' in the smaller team
 
 ## Quick Start
 
-Install the executable binary
+Install via homebrew
 ```shell
-git clone https://github.com/mherod/resharkercli.git && cd resharkercli && ./gradlew installBinary
+brew install mherod/tap/resharkercli
 ```
 
 Then run `resharkercli --help` from your project directory for a full list of options
