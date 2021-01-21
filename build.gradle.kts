@@ -25,7 +25,7 @@ val ktorVersion = "1.4.3"
 val coroutinesVersion = "1.4.2"
 
 group = "resharker"
-version = "1.0"
+version = "0.0.1"
 
 repositories {
     mavenCentral()
