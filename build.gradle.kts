@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinCompilationToRunnableFiles
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 import org.jetbrains.kotlin.util.capitalizeDecapitalize.toLowerCaseAsciiOnly
 import java.lang.System.getProperty
+import java.lang.System.getenv
 
 plugins {
     kotlin("multiplatform") version "1.4.30-M1"
@@ -126,6 +127,14 @@ task<Copy>("installBinary") {
     include("*.kexe")
     rename { it.substringBefore('.') }
     into("/usr/local/bin/")
+}
+
+task<Copy>("installBrewBinary") {
+    dependsOn(tasks.getByName("build"))
+    from("$buildDir/bin/native/releaseExecutable/")
+    include("*.kexe")
+    rename { it.substringBefore('.') }
+    into("${getenv("HOMEBREW_PREFIX")}/bin")
 }
 
 task<JavaExec>("run") {
