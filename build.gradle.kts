@@ -8,6 +8,8 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinCommonOptions
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilationToRunnableFiles
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
+import org.jetbrains.kotlin.util.capitalizeDecapitalize.toLowerCaseAsciiOnly
+import java.lang.System.getProperty
 
 plugins {
     kotlin("multiplatform") version "1.4.30-M1"
@@ -34,7 +36,7 @@ repositories {
 kotlin {
     jvm()
 
-    val hostOs = System.getProperty("os.name")
+    val hostOs = getProperty("os.name")
     val isMingwX64 = hostOs.startsWith("Windows")
     val nativeTarget = when {
         hostOs == "Mac OS X" -> macosX64("native")
@@ -134,4 +136,23 @@ task<JavaExec>("run") {
     val main: KotlinCompilation<KotlinCommonOptions> by jvm.compilations
     val runtimeDependencies = (main as KotlinCompilationToRunnableFiles<KotlinCommonOptions>).runtimeDependencyFiles
     classpath = files(main.output.allOutputs, runtimeDependencies)
+}
+
+task<Copy>("copyReleaseBinary") {
+    dependsOn(tasks.getByName("build"))
+    from("$buildDir/bin/native/releaseExecutable/")
+    include("*.kexe")
+    rename { makeReleaseBinaryName(it) }
+    into("$buildDir/artifacts")
+}
+
+fun makeReleaseBinaryName(input: String): String = buildString {
+    append(input.substringBefore('.'))
+    append('-')
+    append(version)
+    append('-')
+    val host = getProperty("os.name").replace("\\s".toRegex(), "")
+    val osVersion = getProperty("os.version")
+    append(host.toLowerCaseAsciiOnly())
+    append(osVersion.toLowerCaseAsciiOnly())
 }

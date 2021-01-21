@@ -26,7 +26,7 @@ jobs:
             - ~/.gradle
           key: v2-dependencies-{{ checksum "build.gradle.kts" }}-{{ checksum "settings.gradle.kts" }}
 
-      - run: ./gradlew build allTests installBinary run
+      - run: ./gradlew build allTests installBinary run copyReleaseBinary
       - run: resharkercli --help
       - run: resharkercli version
       - run: resharkercli current --help
@@ -36,3 +36,6 @@ jobs:
       - run: resharkercli parse --help
       - run: resharkercli parse key "dirty/string/with a key/RES-1/somewhere"
       - run: resharkercli query jql project=RES
+      - store_artifacts:
+          destination: builds
+          path: ~/repo/build/artifacts
