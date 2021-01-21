@@ -134,7 +134,7 @@ task<Copy>("installBrewBinary") {
     from("$buildDir/bin/native/releaseExecutable/")
     include("*.kexe")
     rename { it.substringBefore('.') }
-    into("${getenv("HOMEBREW_PREFIX")}/bin")
+    into("${getenv("HOMEBREW_FORMULA_PREFIX")}/bin")
 }
 
 task<JavaExec>("run") {
