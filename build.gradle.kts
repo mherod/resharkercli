@@ -146,10 +146,3 @@ task<JavaExec>("run") {
     val runtimeDependencies = (main as KotlinCompilationToRunnableFiles<KotlinCommonOptions>).runtimeDependencyFiles
     classpath = files(main.output.allOutputs, runtimeDependencies)
 }
-
-task<Exec>("cleanVcs") {
-    workingDir(projectDir)
-    inputs.files(fileTree(projectDir))
-    outputs.files(fileTree(projectDir))
-    commandLine("git", "clean", "-fXd", "$projectDir/")
-}
