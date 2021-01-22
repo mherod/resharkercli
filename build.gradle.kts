@@ -147,21 +147,9 @@ task<JavaExec>("run") {
     classpath = files(main.output.allOutputs, runtimeDependencies)
 }
 
-task<Copy>("copyReleaseBinary") {
-    dependsOn(tasks.getByName("build"))
-    from("$buildDir/bin/native/releaseExecutable/")
-    include("*.kexe")
-    rename { makeReleaseBinaryName(it) }
-    into("$buildDir/artifacts")
-}
-
-fun makeReleaseBinaryName(input: String): String = buildString {
-    append(input.substringBefore('.'))
-    append('-')
-    append(version)
-    append('-')
-    val host = getProperty("os.name").replace("\\s".toRegex(), "")
-    val osVersion = getProperty("os.version")
-    append(host.toLowerCaseAsciiOnly())
-    append(osVersion.toLowerCaseAsciiOnly())
+task<Exec>("cleanVcs") {
+    workingDir(projectDir)
+    inputs.files(fileTree(projectDir))
+    outputs.files(fileTree(projectDir))
+    commandLine("git", "clean", "-fXd", "$projectDir/")
 }
