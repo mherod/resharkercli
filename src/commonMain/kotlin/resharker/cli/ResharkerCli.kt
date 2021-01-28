@@ -35,7 +35,9 @@ class ResharkerCli(
                 .singleOrNull { parseKey(it.ref) == key }
             val newBranch = matchedLocalBranch == null && matchedRemoteBranch == null
             val newBranchRef: Deferred<ProvidesRef> = newBranchRefMap.getOrPut(key) {
-                "feature/${key}_${makeSummaryForBranch(key)}".toRef()
+                async {
+                    "feature/${key}_${makeSummaryForBranch(key)}".toRef()
+                }
             }
             val checkout = git.checkout(
                 name = when {
