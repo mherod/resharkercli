@@ -29,8 +29,9 @@ interface GitClient {
     fun fetch(all: Boolean = false)
 
     fun push(
-        remote: RemoteName = remote().list().single(),
+        remote: RemoteName = defaultRemote(),
         branch: ProvidesRef = HEAD,
+        specifyUpstream: Boolean,
     )
 
     fun listBranches(remote: Boolean = false): Set<ProvidesRef>
@@ -39,8 +40,21 @@ interface GitClient {
 
     fun remote(): Remote
 
+    fun setBranchUpstream(
+        remote: RemoteName = defaultRemote(),
+        branch: ProvidesRef = getCurrentBranch(),
+    ): Boolean
+
     interface Remote {
         fun list(): Set<RemoteName>
+    }
+}
+
+fun GitClient.defaultRemote(): RemoteName = remote().list().let {
+    when {
+        it.size == 1 -> it.single()
+        origin in it -> origin
+        else -> it.sortedBy { it.name }.first()
     }
 }
 

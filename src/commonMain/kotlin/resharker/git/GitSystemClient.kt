@@ -18,7 +18,7 @@ class GitSystemClient : GitClient {
                     if (newBranch) {
                         append(" -b")
                     }
-                    name ?.let {
+                    name?.let {
                         append(" ${it.ref}")
                     }
                     track?.let {
@@ -44,8 +44,8 @@ class GitSystemClient : GitClient {
         )
     }
 
-    override fun push(remote: RemoteName, branch: ProvidesRef) {
-        exec("git push ${remote.name} ${branch.ref}")
+    override fun push(remote: RemoteName, branch: ProvidesRef, specifyUpstream: Boolean) {
+        exec("git push ${if (specifyUpstream) "-u " else " "}${remote.name} ${branch.ref}")
     }
 
     override fun getCurrentBranch(): ProvidesRef {
@@ -68,6 +68,12 @@ class GitSystemClient : GitClient {
         return exec("git describe ${commitish.ref} --tags --abbrev=$abbrev").trim()
             .also { check(it.isNotBlank()) }
             .also { check(!it.startsWith("fatal:")) }
+    }
+
+    override fun setBranchUpstream(remote: RemoteName, branch: ProvidesRef): Boolean {
+        require(branch == getCurrentBranch()) // just a sanity check for now
+        exec("git branch --set-upstream-to ${remote.name}/${branch.ref}")
+        return true
     }
 
     override fun log(range: RefRange): String = exec(

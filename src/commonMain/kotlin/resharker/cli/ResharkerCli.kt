@@ -33,7 +33,12 @@ class ResharkerCli(
                 .singleOrNull { parseKey(it.ref) == key }
             val matchedRemoteBranch = git.listBranches(remote = true)
                 .singleOrNull { parseKey(it.ref) == key }
-            val newBranch = matchedLocalBranch == null && matchedRemoteBranch == null
+
+            val existingFromLocal = matchedLocalBranch != null && matchedRemoteBranch == null
+            val existingSkipTrack = matchedLocalBranch != null && matchedRemoteBranch != null
+            val newFromLocalCreate = matchedLocalBranch == null && matchedRemoteBranch == null
+            val newFromRemoteCheckout = matchedRemoteBranch != null && matchedLocalBranch == null
+
             val newBranchRef: Deferred<ProvidesRef> = newBranchRefMap.getOrPut(key) {
                 async {
                     "feature/${key}_${makeSummaryForBranch(key)}".toRef()
@@ -41,18 +46,39 @@ class ResharkerCli(
             }
             val checkout = git.checkout(
                 name = when {
-                    newBranch -> newBranchRef.await()
+                    newFromLocalCreate -> newBranchRef.await()
                     else -> matchedLocalBranch
                 },
-                newBranch = newBranch,
+                newBranch = newFromLocalCreate,
                 track = when {
-                    newBranch -> remotes.single() + newBranchRef.await()
-                    matchedLocalBranch == null -> matchedRemoteBranch
-                    else -> null
+                    existingSkipTrack -> null
+                    newFromRemoteCheckout -> {
+                        // matched remote, no local, we're going to checkout so specify remote
+                        remotes.single() + newBranchRef.await()
+                    }
+                    newFromLocalCreate || existingFromLocal -> {
+                        // no remote to track, we'll make new / already made locally, not pushed yet
+                        // we'll add the upstream next
+                        null
+                    }
+                    matchedRemoteBranch != null -> {
+                        // matched remote, has local
+                        matchedRemoteBranch
+                    }
+                    else -> error("unexpected branch state")
                 }
             )
-            if (checkout && newBranch) {
-                git.push(branch = newBranchRef.await())
+            if (checkout) {
+                // checked out successfully
+                if (matchedRemoteBranch != null) {
+                    // there's a remote already, link up
+                    git.setBranchUpstream()
+                }
+                // push branch, link to new upstream if creating it on remote
+                git.push(
+                    branch = newBranchRef.await(),
+                    specifyUpstream = matchedRemoteBranch == null
+                )
             }
         }
     }
@@ -62,13 +88,10 @@ class ResharkerCli(
         return jira.getIssue(issueKey)
             .fields
             .summary
-            .toLowerCase()
-            .replace("\\s+".toRegex(), "-")
+            .sanitisedForBranchPart()
     }
 
-    fun currentBranchKey(): String {
-        return parseKey(input = git.getCurrentBranch())
-    }
+    fun currentBranchKey(): String = parseKey(input = git.getCurrentBranch())
 
     suspend fun openCurrentBranchIssue() {
         openBrowserForIssue(
@@ -192,6 +215,7 @@ class ResharkerCli(
     private fun JiraRestIssue.summaryString(): String {
         return "\t$key ${fields.summary} (${fields.status.name})"
     }
+
 }
 
 fun openBrowserForIssue(issue: JiraRestIssue) {
@@ -210,4 +234,8 @@ fun hasMainBranchName(): (Commitish) -> Boolean = { branchInput ->
         "main",
         "master"
     )
+}
+
+fun String.sanitisedForBranchPart(): String {
+    return toLowerCase().replace("[\\\\/\\s]+".toRegex(), "-")
 }
