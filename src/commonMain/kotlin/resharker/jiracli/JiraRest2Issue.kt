@@ -40,7 +40,7 @@ data class JiraRest2Issue(
         @SerialName("creator")
         val creator: Creator,
         @SerialName("description")
-        val description: String = "",
+        val description: String? = null,
         @SerialName("duedate")
         val duedate: String? = null,
         @SerialName("environment")
