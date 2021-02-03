@@ -38,6 +38,10 @@ interface GitClient {
 
     fun log(range: RefRange): String
 
+    fun listTags(): List<CommitTag>
+
+    fun showRef(ref: ProvidesRef): List<ProvidesRef>
+
     fun remote(): Remote
 
     fun setBranchUpstream(

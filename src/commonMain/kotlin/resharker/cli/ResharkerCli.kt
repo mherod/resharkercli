@@ -113,13 +113,27 @@ class ResharkerCli(
 
     suspend fun outputReleaseNotes() {
 
-        val branch = git.getCurrentBranch()
-        val lastTag = git.describe(commitish = detectMainBranch())
+        val currentBranch = git.getCurrentBranch()
+        val currentBranchRef = git.showRef(currentBranch).first()
+        val mainBranch = git.showRef(detectMainBranch()).first()
+        val currentTag = git.describe(commitish = mainBranch)
 
-        println("Changes since $lastTag on branch $branch")
+        val prevTag = if (currentBranchRef == mainBranch) {
+            git.listTags()
+                .takeWhile { it.name != currentTag }
+                .last()
+                .name
+                .also {
+                    println("Changes since $it on $currentBranchRef ($currentTag)")
+                }
+        } else {
+            currentTag.also {
+                println("Changes since $it on branch $currentBranch")
+            }
+        }
 
         val issueKeys = extractIssueKeys(
-            dirtyInput = git.getLogDiff(since = lastTag.toRef()),
+            dirtyInput = git.getLogDiff(since = prevTag.toRef(), until = currentBranchRef),
             projectKeys = jira.getProjectKeys()
         )
 

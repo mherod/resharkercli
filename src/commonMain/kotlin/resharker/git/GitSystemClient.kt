@@ -4,6 +4,7 @@ import resharker.cli.exec
 import resharker.git.model.*
 
 class GitSystemClient : GitClient {
+
     override fun version(): String {
         return exec("git version")
             .trim()
@@ -86,6 +87,27 @@ class GitSystemClient : GitClient {
     ).also { s ->
         check(s.isNotBlank())
         check(!s.startsWith("fatal:"))
+    }
+
+    override fun listTags(): List<CommitTag> {
+        return exec("git tag")
+            .split("[\\n|\\s]".toRegex())
+            .map { each ->
+                CommitTag(
+                    name = each,
+                    ref = each
+                )
+            }
+    }
+
+    override fun showRef(ref: ProvidesRef): List<ProvidesRef> {
+        return exec("git show-ref ${ref.ref}")
+            .split("\\n".toRegex())
+            .mapNotNull { s ->
+                s.split("\\s".toRegex()).takeIf { it.size == 2 }?.let { hash ->
+                    Commitish(hash.first())
+                }
+            }.distinct()
     }
 
     override fun getLogDiff(
