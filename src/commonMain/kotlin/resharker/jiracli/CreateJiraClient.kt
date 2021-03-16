@@ -27,9 +27,17 @@ class JiraClientImpl : JiraClient {
 
     override suspend fun getProject(id: String): JiraProject.JiraProjectItem = delegate.getProject(id)
 
+    override suspend fun currentSessionUser(): JiraUserSimple = delegate.currentSessionUser()
+
+    override suspend fun myself(): JiraUser = delegate.myself()
+
+    override suspend fun listUsers(): ArrayList<JiraUser> = delegate.listUsers()
+
     override suspend fun listIssues(projectKey: String): JiraRest3IssueSearch = delegate.listIssues(projectKey)
 
     override suspend fun getIssue(key: String): JiraRest2Issue = delegate.getIssue(key)
+
+    override suspend fun assignIssue(key: String, assignee: String?) = delegate.assignIssue(key, assignee)
 
     override suspend fun searchIssues(jql: String): JiraRest3IssueSearch = delegate.searchIssues(jql)
 

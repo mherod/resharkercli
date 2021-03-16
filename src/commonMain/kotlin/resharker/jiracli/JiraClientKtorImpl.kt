@@ -13,12 +13,13 @@ class JiraClientKtorImpl(
         install(JsonFeature) {
             serializer = jsonSerializer()
         }
+
     },
     private val rootUrl: String,
     private val credentials: JiraCredentials,
 ) : JiraClient {
 
-    private fun HttpRequestBuilder.jiraRestUrl(function: URLBuilder.() -> Unit) = url {
+    private inline fun HttpRequestBuilder.jiraRestUrl(crossinline function: URLBuilder.() -> Unit) = url {
         protocol = URLProtocol.HTTPS
         host = rootUrl.extractHostName()
         function(this)
@@ -41,6 +42,28 @@ class JiraClientKtorImpl(
         configRequest()
     }
 
+    override suspend fun currentSessionUser(): JiraUserSimple = httpClient.request {
+        url {
+            protocol = URLProtocol.HTTPS
+            host = rootUrl.extractHostName()
+            path("rest", "auth", "latest", "session")
+            configRequest()
+        }
+    }
+
+    override suspend fun myself(): JiraUser = httpClient.request {
+        url("$rootUrl/rest/api/3/myself")
+        configRequest()
+    }
+
+    override suspend fun listUsers(): ArrayList<JiraUser> = httpClient.request {
+        jiraRestUrl {
+            path("rest", "api", "3", "users", "search")
+            parameters.append("startAt", "0")
+            parameters.append("maxResults", "100")
+        }
+    }
+
     override suspend fun listIssues(projectKey: String): JiraRest3IssueSearch = httpClient.request {
         jiraRestUrl {
             path("rest", "api", "3", "search")
@@ -53,6 +76,17 @@ class JiraClientKtorImpl(
         return httpClient.request {
             jiraRestUrl {
                 path("rest", "api", "2", "issue", key)
+            }
+        }
+    }
+
+    override suspend fun assignIssue(key: String, assignee: String?) {
+        key requireMatch issueKeyRegex
+        httpClient.put<Unit> {
+            contentType(ContentType.Application.Json)
+            body = JiraRestAccountId(accountId = assignee)
+            jiraRestUrl {
+                path("rest", "api", "3", "issue", key, "assignee")
             }
         }
     }

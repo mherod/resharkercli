@@ -39,9 +39,22 @@ class ResharkerCli(
             val newFromLocalCreate = matchedLocalBranch == null && matchedRemoteBranch == null
             val newFromRemoteCheckout = matchedRemoteBranch != null && matchedLocalBranch == null
 
-            val newBranchRef: Deferred<ProvidesRef> = newBranchRefMap.getOrPut(key) {
+            val issueDeferred = async {
+                jira.getIssue(key)
+            }
+            val newBranchRef = newBranchRefMap.getOrPut(key) {
                 async {
-                    "feature/${key}_${makeSummaryForBranch(key)}".toRef()
+                    "feature/${key}_${issueDeferred.await().makeSummaryForBranch()}".toRef()
+                }
+            }
+            val assignJob = launch {
+                val issue = issueDeferred.await()
+                if (issue.fields.assignee == null) {
+                    val myself = jira.myself()
+                    jira.assignIssue(
+                        key = key,
+                        assignee = myself.accountId
+                    )
                 }
             }
             val checkout = git.checkout(
@@ -80,13 +93,12 @@ class ResharkerCli(
                     specifyUpstream = matchedRemoteBranch == null
                 )
             }
+            assignJob.join()
         }
     }
 
-    private suspend fun makeSummaryForBranch(issueKey: String): String {
-        issueKey requireMatch issueKeyRegex
-        return jira.getIssue(issueKey)
-            .fields
+    private fun JiraRest2Issue.makeSummaryForBranch(): String {
+        return fields
             .summary
             .sanitisedForBranchPart()
     }
@@ -94,8 +106,9 @@ class ResharkerCli(
     fun currentBranchKey(): String = parseKey(input = git.getCurrentBranch())
 
     suspend fun openCurrentBranchIssue() {
+        val currentBranchKey = currentBranchKey()
         openBrowserForIssue(
-            issue = jira.getIssue(key = currentBranchKey())
+            issue = jira.getIssue(key = currentBranchKey)
         )
     }
 

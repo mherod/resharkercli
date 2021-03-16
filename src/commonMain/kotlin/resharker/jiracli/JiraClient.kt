@@ -6,9 +6,17 @@ interface JiraClient {
 
     suspend fun getProject(id: String): JiraProject.JiraProjectItem
 
+    suspend fun currentSessionUser(): JiraUserSimple
+
+    suspend fun myself(): JiraUser
+
+    suspend fun listUsers(): ArrayList<JiraUser>
+
     suspend fun listIssues(projectKey: String): JiraRest3IssueSearch
 
     suspend fun getIssue(key: String): JiraRest2Issue
+
+    suspend fun assignIssue(key: String, assignee: String?)
 
     suspend fun searchIssues(jql: String): JiraRest3IssueSearch
 
