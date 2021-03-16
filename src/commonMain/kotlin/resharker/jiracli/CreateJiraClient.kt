@@ -3,10 +3,12 @@ package resharker.jiracli
 import resharker.cli.isValidUrl
 import resharker.cli.requireEnv
 
-fun createJiraClient(): IJiraClient = object : IJiraClient {
+fun createJiraClient(): JiraClient = JiraClientImpl()
 
-    private val jiraClientLazy: Lazy<JiraClient> = lazy {
-        JiraClient(
+class JiraClientImpl : JiraClient {
+
+    private val jiraClientLazy: Lazy<JiraClientKtorImpl> = lazy {
+        JiraClientKtorImpl(
             rootUrl = requireEnv("JIRA_ROOT").also { rootUrl ->
                 require(isValidUrl(rootUrl)) {
                     "JIRA_ROOT should be a valid URL (https://myjira.atlassian.com)"
@@ -19,7 +21,7 @@ fun createJiraClient(): IJiraClient = object : IJiraClient {
         )
     }
 
-    private val delegate: IJiraClient by jiraClientLazy
+    private val delegate: JiraClient by jiraClientLazy
 
     override suspend fun listProjects(): ArrayList<JiraProject.JiraProjectItem> = delegate.listProjects()
 

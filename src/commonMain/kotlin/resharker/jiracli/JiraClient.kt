@@ -1,70 +1,20 @@
 package resharker.jiracli
 
-import io.ktor.client.*
-import io.ktor.client.features.json.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import resharker.cli.extractHostName
-import resharker.cli.issueKeyRegex
-import resharker.cli.requireMatch
+interface JiraClient {
 
-class JiraClient(
-    private val httpClient: HttpClient = HttpClient {
-        install(JsonFeature) {
-            serializer = jsonSerializer()
-        }
-    },
-    private val rootUrl: String,
-    private val credentials: JiraCredentials,
-) : IJiraClient {
+    suspend fun listProjects(): ArrayList<JiraProject.JiraProjectItem>
 
-    private fun HttpRequestBuilder.jiraRestUrl(function: URLBuilder.() -> Unit) = url {
-        protocol = URLProtocol.HTTPS
-        host = rootUrl.extractHostName()
-        function(this)
-        configRequest()
-    }
+    suspend fun getProject(id: String): JiraProject.JiraProjectItem
 
-    private fun HttpRequestBuilder.configRequest() {
-        credentials.apply {
-            authenticateRequest()
-        }
-    }
+    suspend fun listIssues(projectKey: String): JiraRest3IssueSearch
 
-    override suspend fun listProjects(): ArrayList<JiraProject.JiraProjectItem> = httpClient.request {
-        url("$rootUrl/rest/api/2/project")
-        configRequest()
-    }
+    suspend fun getIssue(key: String): JiraRest2Issue
 
-    override suspend fun getProject(id: String): JiraProject.JiraProjectItem = httpClient.request {
-        url("$rootUrl/rest/api/2/project/${id}")
-        configRequest()
-    }
+    suspend fun searchIssues(jql: String): JiraRest3IssueSearch
 
-    override suspend fun listIssues(projectKey: String): JiraRest3IssueSearch = httpClient.request {
-        jiraRestUrl {
-            path("rest", "api", "3", "search")
-            parameters.append("jql", "project = $projectKey")
-        }
-    }
+    fun close()
+}
 
-    override suspend fun getIssue(key: String): JiraRest2Issue {
-        key requireMatch issueKeyRegex
-        return httpClient.request {
-            jiraRestUrl {
-                path("rest", "api", "2", "issue", key)
-            }
-        }
-    }
-
-    override suspend fun searchIssues(jql: String): JiraRest3IssueSearch = httpClient.request {
-        jiraRestUrl {
-            path("rest", "api", "3", "search")
-            parameters.append("jql", jql)
-        }
-    }
-
-    override fun close() {
-        httpClient.close()
-    }
+suspend inline fun JiraClient.getProjectKeys(): Set<String> {
+    return listProjects().map { it.key.toUpperCase() }.toSet()
 }

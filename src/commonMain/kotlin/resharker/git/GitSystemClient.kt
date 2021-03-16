@@ -1,19 +1,24 @@
 package resharker.git
 
-import resharker.cli.exec
+import dev.herod.kmpp.exec
+import kotlinx.coroutines.flow.toList
+import resharker.cli.execBlocking
+import resharker.cli.runBlocking
 import resharker.git.model.*
 
 class GitSystemClient : GitClient {
 
-    override fun version(): String {
-        return exec("git version")
+    override fun version(): String = runBlocking {
+        exec("git version")
+            .toList()
+            .joinToString("\n")
             .trim()
             .let { "\\S*\\d+\\S*".toRegex().find(it)?.value ?: it }
     }
 
     override fun checkout(name: ProvidesRef?, newBranch: Boolean, track: ProvidesRef?): Boolean {
         return runCatching {
-            exec(
+            execBlocking(
                 command = buildString {
                     append("git checkout")
                     if (newBranch) {
@@ -35,7 +40,7 @@ class GitSystemClient : GitClient {
     }
 
     override fun fetch(all: Boolean) {
-        exec(
+        execBlocking(
             command = buildString {
                 append("git fetch")
                 if (all) {
@@ -46,18 +51,18 @@ class GitSystemClient : GitClient {
     }
 
     override fun push(remote: RemoteName, branch: ProvidesRef, specifyUpstream: Boolean) {
-        exec("git push ${if (specifyUpstream) "-u " else " "}${remote.name} ${branch.ref}")
+        execBlocking("git push ${if (specifyUpstream) "-u " else " "}${remote.name} ${branch.ref}")
     }
 
     override fun getCurrentBranch(): ProvidesRef {
-        return exec("git rev-parse --abbrev-ref HEAD").trim()
+        return execBlocking("git rev-parse --abbrev-ref HEAD").trim()
             .also { check(it.isNotBlank()) }
             .also { check(!it.startsWith("fatal:")) }
             .toRef()
     }
 
     override fun listBranches(remote: Boolean): Set<ProvidesRef> {
-        return exec("git branch${if (remote) " -r" else ""}")
+        return execBlocking("git branch${if (remote) " -r" else ""}")
             .split("[\\n|\\s]".toRegex())
             .map { it.trim() }
             .filter { it.isNotBlank() }
@@ -66,18 +71,18 @@ class GitSystemClient : GitClient {
     }
 
     override fun describe(commitish: ProvidesRef, abbrev: Int): String {
-        return exec("git describe ${commitish.ref} --tags --abbrev=$abbrev").trim()
+        return execBlocking("git describe ${commitish.ref} --tags --abbrev=$abbrev").trim()
             .also { check(it.isNotBlank()) }
             .also { check(!it.startsWith("fatal:")) }
     }
 
     override fun setBranchUpstream(remote: RemoteName, branch: ProvidesRef): Boolean {
         require(branch == getCurrentBranch()) // just a sanity check for now
-        exec("git branch --set-upstream-to ${remote.name}/${branch.ref}")
+        execBlocking("git branch --set-upstream-to ${remote.name}/${branch.ref}")
         return true
     }
 
-    override fun log(range: RefRange): String = exec(
+    override fun log(range: RefRange): String = execBlocking(
         command = buildString {
             append("git log")
             append(" ${range.value}")
@@ -90,7 +95,7 @@ class GitSystemClient : GitClient {
     }
 
     override fun listTags(): List<CommitTag> {
-        return exec("git tag")
+        return execBlocking("git tag")
             .split("[\\n|\\s]".toRegex())
             .map { each ->
                 CommitTag(
@@ -101,7 +106,7 @@ class GitSystemClient : GitClient {
     }
 
     override fun showRef(ref: ProvidesRef): List<ProvidesRef> {
-        return exec("git show-ref ${ref.ref}")
+        return execBlocking("git show-ref ${ref.ref}")
             .split("\\n".toRegex())
             .mapNotNull { s ->
                 s.split("\\s".toRegex()).takeIf { it.size == 2 }?.let { hash ->
@@ -118,7 +123,7 @@ class GitSystemClient : GitClient {
     override fun remote(): GitClient.Remote = GitSystemRemote()
 
     inner class GitSystemRemote : GitClient.Remote {
-        override fun list(): Set<RemoteName> = exec("git remote")
+        override fun list(): Set<RemoteName> = execBlocking("git remote")
             .split("[\\n|\\s]".toRegex())
             .map { it.trim() }
             .filter { it.isNotBlank() }

@@ -9,7 +9,7 @@ import resharker.jiracli.*
 
 class ResharkerCli(
     private val git: GitClient,
-    private val jira: IJiraClient,
+    private val jira: JiraClient,
 ) {
 
     private val newBranchRefMap = LinkedHashMap<String, Deferred<ProvidesRef>>(10)
@@ -238,7 +238,7 @@ fun openBrowserForIssue(issue: JiraRestIssue) {
         .path("browse", issue.key)
         .build()
     println("Opening \"$url\"")
-    exec("open \"$url\"")
+    execBlocking("open \"$url\"")
 }
 
 fun ResharkerCli.outputCurrentBranchKey() = println(currentBranchKey())

@@ -25,7 +25,7 @@ actual inline fun mainBlock(crossinline block: suspend CoroutineScope.() -> Unit
 }
 
 @OptIn(ExperimentalIoApi::class)
-actual fun exec(command: String): String {
+actual fun execBlocking(command: String): String {
     if (debugLogsEnabled) println(">> $command")
     return popen(command, "r")?.use { pointer ->
         readToBuffer(

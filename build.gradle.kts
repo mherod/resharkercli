@@ -185,6 +185,5 @@ fun getInstallPath(): String = file(
         ?: "/usr/local/bin/"
 ).let { path ->
     path.exists() || path.mkdirs()
-    println(path.absolutePath)
     path.absolutePath
 }

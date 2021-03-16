@@ -1,15 +1,11 @@
-@file:Suppress("NOTHING_TO_INLINE")
+package dev.herod.kmpp
 
-package resharker.cli
-
-import dev.herod.kmpp.exec
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
 import kotlin.system.exitProcess
 
 actual inline fun mainBlock(crossinline block: suspend CoroutineScope.() -> Unit) {
-    kotlinx.coroutines.runBlocking {
+    runBlocking {
         runCatching { block() }
             .onFailure { throwable ->
                 val message = throwable.message ?: throwable.cause?.message
@@ -21,12 +17,3 @@ actual inline fun mainBlock(crossinline block: suspend CoroutineScope.() -> Unit
     }
     Unit
 }
-
-@ExperimentalCoroutinesApi
-actual fun execBlocking(command: String): String {
-    return runBlocking {
-        exec(command).toList().joinToString("\n")
-    }
-}
-
-actual inline fun requireEnv(key: String): String = requireNotNull(System.getenv(key))
