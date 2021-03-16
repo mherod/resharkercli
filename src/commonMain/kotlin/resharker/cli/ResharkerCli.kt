@@ -260,5 +260,5 @@ fun hasMainBranchName(): (Commitish) -> Boolean = { branchInput ->
 }
 
 fun String.sanitisedForBranchPart(): String {
-    return toLowerCase().replace("[\\\\/\\s]+".toRegex(), "-")
+    return toLowerCase().replace("[\\\\/\\s.\\[\\]]+".toRegex(), "-")
 }
