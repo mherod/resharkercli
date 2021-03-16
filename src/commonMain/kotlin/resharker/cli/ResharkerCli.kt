@@ -189,7 +189,7 @@ class ResharkerCli(
         withTimeoutOrNull(2_000) { jira.getProjectKeys() }.orEmpty().toSet()
     }
 
-    private fun extractIssueKeys(
+    fun extractIssueKeys(
         dirtyInput: String,
         projectKeys: Set<String>,
     ) = issueKeyRegex
