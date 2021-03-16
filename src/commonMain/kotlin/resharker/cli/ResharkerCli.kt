@@ -97,11 +97,7 @@ class ResharkerCli(
         }
     }
 
-    private fun JiraRest2Issue.makeSummaryForBranch(): String {
-        return fields
-            .summary
-            .sanitisedForBranchPart()
-    }
+    private fun JiraRestIssue.makeSummaryForBranch(): String = fields.summary.sanitisedForBranchPart()
 
     fun currentBranchKey(): String = parseKey(input = git.getCurrentBranch())
 
