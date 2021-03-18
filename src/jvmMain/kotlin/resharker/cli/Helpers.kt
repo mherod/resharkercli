@@ -23,10 +23,8 @@ actual inline fun mainBlock(crossinline block: suspend CoroutineScope.() -> Unit
 }
 
 @ExperimentalCoroutinesApi
-actual fun execBlocking(command: String): String {
-    return runBlocking {
-        exec(command).toList().joinToString("\n")
-    }
+actual fun execBlocking(command: String): String = runBlocking {
+    exec(command).toList().joinToString("\n")
 }
 
 actual inline fun requireEnv(key: String): String = requireNotNull(System.getenv(key))

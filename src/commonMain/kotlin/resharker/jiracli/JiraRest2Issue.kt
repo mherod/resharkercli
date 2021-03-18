@@ -98,7 +98,7 @@ data class JiraRest2Issue(
         @SerialName("worklog")
         val worklog: Worklog?,
         @SerialName("workratio")
-        val workratio: Int? = null,
+        override val workratio: Long? = null,
     ) : JiraRestIssueFields {
 
         @Serializable

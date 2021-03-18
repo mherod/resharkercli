@@ -112,11 +112,13 @@ class ResharkerCli(
         jira.listProjects().forEach { projectItem ->
             val key = projectItem.key
             val name = projectItem.name.trim()
-            println(when (key) {
-                name -> key
-                name.toInitialism() -> "$key ($name)"
-                else -> "$key $name"
-            })
+            println(
+                when (key) {
+                    name -> key
+                    name.toInitialism() -> "$key ($name)"
+                    else -> "$key $name"
+                }
+            )
         }
     }
 
@@ -156,7 +158,13 @@ class ResharkerCli(
         return issueKeys.sorted()
             .asFlow()
             .distinctUntilChanged()
-            .map { jira.getIssue(it) }
+            .flatMapMerge { issueKey ->
+                flow {
+                    emit(value = jira.getIssue(issueKey))
+                }.catch { throwable ->
+                    throwable.cause?.printStackTrace()
+                }
+            }
             .distinctUntilChanged()
     }
 
@@ -259,6 +267,6 @@ fun hasMainBranchName(): (Commitish) -> Boolean = { branchInput ->
     )
 }
 
-fun String.sanitisedForBranchPart(): String {
-    return toLowerCase().replace("[\\\\/\\s.\\[\\]]+".toRegex(), "-")
-}
+fun String.sanitisedForBranchPart(): String = toLowerCase()
+    .replace("[.!\\\\/\\s\\[\\]]+".toRegex(), "-")
+    .trim { it == '-' }

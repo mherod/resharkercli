@@ -1,7 +1,7 @@
 package resharker.cli
 
 //language=RegExp
-val issueKeyRegex = "(\\w{1,5}+-\\d{1,5},?)+".toRegex()
+val issueKeyRegex = "([A-Za-z0-9]{1,5}+-\\d{1,5},?)+".toRegex()
 
 //language=RegExp
 val enclosedKeyRegex = "\\[(.+)]".toRegex()

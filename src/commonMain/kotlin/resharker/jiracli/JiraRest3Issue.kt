@@ -90,8 +90,9 @@ data class JiraRest3Issue(
         @SerialName("watches")
         val watches: Watches,
         @SerialName("workratio")
-        val workratio: Int? = null,
+        override val workratio: Long? = null,
     ) : JiraRestIssueFields {
+
         @Serializable
         data class AggregateProgress(
             @SerialName("percent")

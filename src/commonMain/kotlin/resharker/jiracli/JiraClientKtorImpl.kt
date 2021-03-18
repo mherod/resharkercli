@@ -4,6 +4,7 @@ import io.ktor.client.*
 import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import kotlinx.coroutines.withTimeout
 import resharker.cli.extractHostName
 import resharker.cli.issueKeyRegex
 import resharker.cli.requireMatch
@@ -73,9 +74,11 @@ class JiraClientKtorImpl(
 
     override suspend fun getIssue(key: String): JiraRest2Issue {
         key requireMatch issueKeyRegex
-        return httpClient.request {
-            jiraRestUrl {
-                path("rest", "api", "2", "issue", key)
+        return withTimeout(10_000) {
+            httpClient.request {
+                jiraRestUrl {
+                    path("rest", "api", "2", "issue", key)
+                }
             }
         }
     }
