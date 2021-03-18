@@ -3,6 +3,12 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/resharkercli.iml" filepath="$PROJECT_DIR$/.idea/resharkercli.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/resharkercli.commonMain.iml" filepath="$PROJECT_DIR$/.idea/modules/resharkercli.commonMain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/resharkercli.commonTest.iml" filepath="$PROJECT_DIR$/.idea/modules/resharkercli.commonTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/resharkercli.jvmMain.iml" filepath="$PROJECT_DIR$/.idea/modules/resharkercli.jvmMain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/resharkercli.jvmTest.iml" filepath="$PROJECT_DIR$/.idea/modules/resharkercli.jvmTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/resharkercli.nativeMain.iml" filepath="$PROJECT_DIR$/.idea/modules/resharkercli.nativeMain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/resharkercli.nativeTest.iml" filepath="$PROJECT_DIR$/.idea/modules/resharkercli.nativeTest.iml" />
     </modules>
   </component>
 </project>
