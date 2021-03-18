@@ -158,13 +158,7 @@ class ResharkerCli(
         return issueKeys.sorted()
             .asFlow()
             .distinctUntilChanged()
-            .flatMapMerge { issueKey ->
-                flow {
-                    emit(value = jira.getIssue(issueKey))
-                }.catch { throwable ->
-                    throwable.cause?.printStackTrace()
-                }
-            }
+            .map { issueKey -> jira.getIssue(issueKey) }
             .distinctUntilChanged()
     }
 
