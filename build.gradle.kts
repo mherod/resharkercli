@@ -8,6 +8,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinCommonOptions
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilationToRunnableFiles
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.lang.System.getProperty
 import java.lang.System.getenv
 
@@ -48,6 +49,12 @@ kotlin {
     targets.flatMap(KotlinTarget::compilations).forEach { compilation ->
         compilation.kotlinOptions {
             freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+        }
+    }
+
+    targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
+        binaries.all {
+            freeCompilerArgs += "-Xdisable-phases=EscapeAnalysis"
         }
     }
 
@@ -103,6 +110,10 @@ kotlin {
             }
         }
     }
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions.jvmTarget = "1.8"
 }
 
 val build: Task by tasks
