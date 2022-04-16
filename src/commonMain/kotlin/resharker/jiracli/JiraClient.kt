@@ -24,5 +24,5 @@ interface JiraClient {
 }
 
 suspend inline fun JiraClient.getProjectKeys(): Set<String> {
-    return listProjects().map { it.key.toUpperCase() }.toSet()
+    return listProjects().map { it.key.uppercase() }.toSet()
 }

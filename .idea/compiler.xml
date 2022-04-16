@@ -6,6 +6,10 @@
       <module name="resharkercli.commonTest" target="1.8" />
       <module name="resharkercli.jvmMain" target="1.8" />
       <module name="resharkercli.jvmTest" target="1.8" />
+      <module name="resharkercli.kmpx.commonMain" target="1.6" />
+      <module name="resharkercli.kmpx.commonTest" target="1.6" />
+      <module name="resharkercli.kmpx.jvmMain" target="1.6" />
+      <module name="resharkercli.kmpx.jvmTest" target="1.6" />
     </bytecodeTargetLevel>
   </component>
 </project>

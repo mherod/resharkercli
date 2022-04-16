@@ -11,8 +11,8 @@ class LoopKtTest {
     @Test(timeout = 10_000)
     fun loopTest() = runBlocking {
         assertEquals(
-            expected = 99_999_999,
-            actual = loop().take(99_999_999).count()
+            expected = 99_999,
+            actual = loop().take(99_999).count()
         )
     }
 }

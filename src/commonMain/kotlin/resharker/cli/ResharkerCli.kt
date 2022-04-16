@@ -4,7 +4,10 @@ import io.ktor.http.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import resharker.git.GitClient
-import resharker.git.model.*
+import resharker.git.model.Commitish
+import resharker.git.model.ProvidesRef
+import resharker.git.model.plus
+import resharker.git.model.toRef
 import resharker.jiracli.*
 
 class ResharkerCli(
@@ -206,7 +209,7 @@ class ResharkerCli(
     private tailrec fun String.correctIssueKey(
         projectKeys: Set<String> = projectKeys(),
     ): String {
-        val project = substringBefore('-').toUpperCase()
+        val project = substringBefore('-').uppercase()
         val issueNum = substringAfter('-').trim { !it.isDigit1() }
         return when {
             project in projectKeys -> "$project-$issueNum"
@@ -261,6 +264,6 @@ fun hasMainBranchName(): (Commitish) -> Boolean = { branchInput ->
     )
 }
 
-fun String.sanitisedForBranchPart(): String = toLowerCase()
+fun String.sanitisedForBranchPart(): String = lowercase()
     .replace("[.!\\\\/\\s\\[\\]]+".toRegex(), "-")
     .trim { it == '-' }

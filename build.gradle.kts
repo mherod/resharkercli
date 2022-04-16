@@ -5,16 +5,19 @@
 
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.jetbrains.kotlin.gradle.dsl.KotlinCommonOptions
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilationToRunnableFiles
 import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTargetWithHostTests
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.lang.System.getProperty
 import java.lang.System.getenv
 
 plugins {
-    kotlin("multiplatform") version "1.4.30-M1"
-    kotlin("plugin.serialization") version "1.4.30-M1"
+    kotlin("multiplatform") version "1.6.20"
+    kotlin("plugin.serialization") version "1.6.20"
 }
 
 repositories {
@@ -24,8 +27,7 @@ repositories {
 }
 
 val kotlinVersion: String = KotlinCompilerVersion.VERSION
-val ktorVersion = "1.4.3"
-val coroutinesVersion = "1.4.2"
+val ktorVersion = "1.6.1"
 
 group = "resharker"
 version = "0.0.5"
@@ -37,28 +39,19 @@ repositories {
 kotlin {
     jvm()
 
-    val hostOs = getProperty("os.name")
-    val isMingwX64 = hostOs.startsWith("Windows")
-    val nativeTarget = when {
-        hostOs == "Mac OS X" -> macosX64("native")
-        hostOs == "Linux" -> linuxX64("native")
-        isMingwX64 -> mingwX64("native")
-        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
-    }
-
     targets.flatMap(KotlinTarget::compilations).forEach { compilation ->
         compilation.kotlinOptions {
             freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
         }
     }
 
-    targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
+    targets.withType<KotlinNativeTarget> {
         binaries.all {
             freeCompilerArgs += "-Xdisable-phases=EscapeAnalysis"
         }
     }
 
-    nativeTarget.apply {
+    myNativeTarget().apply {
         compilations {
             getByName("main").apply {
                 enableEndorsedLibs = true
@@ -75,8 +68,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3")
-//                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.4")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-json:$ktorVersion")
                 implementation("io.ktor:ktor-client-serialization:$ktorVersion")
@@ -84,7 +77,7 @@ kotlin {
         }
         val nativeMain by getting {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion-native-mt")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
                 implementation("io.ktor:ktor-client-curl:$ktorVersion")
             }
         }
@@ -98,15 +91,15 @@ kotlin {
             dependencies {
                 implementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion")
                 implementation("org.jetbrains.kotlin:kotlin-test:$kotlinVersion")
-                implementation("junit:junit:4.13")
+                implementation("junit:junit:4.13.2")
             }
         }
         all {
             languageSettings.apply {
-                apiVersion = "1.4"
+                apiVersion = "1.6"
                 enableLanguageFeature("InlineClasses")
-                useExperimentalAnnotation("kotlin.RequiresOptIn")
-                useExperimentalAnnotation("kotlinx.cli.ExperimentalCli")
+                optIn("kotlin.RequiresOptIn")
+                optIn("kotlinx.cli.ExperimentalCli")
             }
         }
     }
@@ -197,4 +190,15 @@ fun getInstallPath(): String = file(
 ).let { path ->
     path.exists() || path.mkdirs()
     path.absolutePath
+}
+
+fun KotlinMultiplatformExtension.myNativeTarget(): KotlinNativeTargetWithHostTests {
+    return getProperty("os.name").let { hostOs ->
+        when {
+            hostOs == "Mac OS X" -> macosX64("native")
+            hostOs == "Linux" -> linuxX64("native")
+            hostOs.startsWith("Windows") -> mingwX64("native")
+            else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
+        }
+    }
 }

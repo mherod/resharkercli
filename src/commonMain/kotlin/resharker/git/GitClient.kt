@@ -2,6 +2,7 @@
 
 package resharker.git
 
+import dev.herod.kx.requireNotNull
 import resharker.git.model.*
 
 interface GitClient {
@@ -54,11 +55,11 @@ interface GitClient {
     }
 }
 
-fun GitClient.defaultRemote(): RemoteName = remote().list().let {
+fun GitClient.defaultRemote(): RemoteName = remote().list().let { remotes ->
     when {
-        it.size == 1 -> it.single()
-        origin in it -> origin
-        else -> it.sortedBy { it.name }.first()
+        remotes.size == 1 -> remotes.single() // only one remote
+        origin in remotes -> origin // classic
+        else -> remotes.minByOrNull { it.name }.requireNotNull() // shortest name (or first, won't happen)
     }
 }
 

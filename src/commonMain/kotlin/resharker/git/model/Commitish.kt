@@ -1,13 +1,17 @@
 package resharker.git.model
 
-inline class Commitish(override val ref: String) : ProvidesRef {
+import kotlin.jvm.JvmInline
+
+@JvmInline
+value class Commitish(override val ref: String) : ProvidesRef {
+
+    init {
+        check(ref.isNotBlank())
+    }
 
     val length: Int get() = ref.length
 
-    override fun toString(): String {
-        check(ref.isNotBlank())
-        return ref
-    }
+    override fun toString(): String = ref
 }
 
 val HEAD: Commitish = Commitish("HEAD")

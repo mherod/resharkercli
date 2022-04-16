@@ -16,7 +16,11 @@ class GitSystemClient : GitClient {
             .let { "\\S*\\d+\\S*".toRegex().find(it)?.value ?: it }
     }
 
-    override fun checkout(name: ProvidesRef?, newBranch: Boolean, track: ProvidesRef?): Boolean {
+    override fun checkout(
+        name: ProvidesRef?,
+        newBranch: Boolean,
+        track: ProvidesRef?,
+    ): Boolean {
         return runCatching {
             execBlocking(
                 command = buildString {

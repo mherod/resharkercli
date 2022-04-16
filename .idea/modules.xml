@@ -7,6 +7,11 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/resharkercli.commonTest.iml" filepath="$PROJECT_DIR$/.idea/modules/resharkercli.commonTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/resharkercli.jvmMain.iml" filepath="$PROJECT_DIR$/.idea/modules/resharkercli.jvmMain.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/resharkercli.jvmTest.iml" filepath="$PROJECT_DIR$/.idea/modules/resharkercli.jvmTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/kmpx/resharkercli.kmpx.iml" filepath="$PROJECT_DIR$/.idea/modules/kmpx/resharkercli.kmpx.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/kmpx/resharkercli.kmpx.commonMain.iml" filepath="$PROJECT_DIR$/.idea/modules/kmpx/resharkercli.kmpx.commonMain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/kmpx/resharkercli.kmpx.commonTest.iml" filepath="$PROJECT_DIR$/.idea/modules/kmpx/resharkercli.kmpx.commonTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/kmpx/resharkercli.kmpx.jvmMain.iml" filepath="$PROJECT_DIR$/.idea/modules/kmpx/resharkercli.kmpx.jvmMain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/kmpx/resharkercli.kmpx.jvmTest.iml" filepath="$PROJECT_DIR$/.idea/modules/kmpx/resharkercli.kmpx.jvmTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/resharkercli.nativeMain.iml" filepath="$PROJECT_DIR$/.idea/modules/resharkercli.nativeMain.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/resharkercli.nativeTest.iml" filepath="$PROJECT_DIR$/.idea/modules/resharkercli.nativeTest.iml" />
     </modules>

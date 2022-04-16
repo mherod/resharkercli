@@ -1,5 +1,8 @@
 package resharker.git.model
 
-inline class RefRange(val value: String) {
+import kotlin.jvm.JvmInline
+
+@JvmInline
+value class RefRange(val value: String) {
     override fun toString(): String = value
 }
